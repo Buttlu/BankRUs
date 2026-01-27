@@ -32,6 +32,8 @@ public class AccountsController(OpenAccountHandler handler) : ControllerBase
             return ValidationProblem(ModelState);
         }
 
+
+
         CreateAccountResponseDto response = new(result.UserId);
 
         return Created("", new { response.UserId });

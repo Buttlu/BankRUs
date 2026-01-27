@@ -9,7 +9,6 @@ public class IdentityService(UserManager<ApplicationUser> userManager) : IIdenti
 
     public async Task<CreateUserResult> CreateUserAsync(CreateUserRequest request)
     {
-        // TODO: skapa använda med Identity
         ApplicationUser user = new() {
             UserName = request.Email.Trim(),
             FirstName = request.FirstName.Trim(),
