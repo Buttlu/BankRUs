@@ -1,0 +1,11 @@
+@BankRUs.WebApi_HostAddress = https://localhost:8080
+### Open Account
+
+POST {{BankRUs.WebApi_HostAddress}}/api/accounts
+Content-Type: application/json
+{
+  "firstName": "Jenna",
+  "lastName": "Doe",
+  "socialSecurityNumber": "19900101-2013",
+  "email": "john@doe.com"
+}
