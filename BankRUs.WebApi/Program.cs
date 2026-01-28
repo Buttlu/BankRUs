@@ -3,15 +3,19 @@ using BankRUs.Application.Repositories;
 using BankRUs.Application.UseCases.OpenAccount;
 using BankRUs.Infrastructure.Identity;
 using BankRUs.Infrastructure.Persistance;
+using BankRUs.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System.Net.Mail;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddScoped<OpenAccountHandler>();
+builder.Services.AddScoped<SmtpClient>();
 builder.Services.AddScoped<IIdentityService, IdentityService>();
-builder.Services.AddScoped<IBankAccountRepository, >();
+builder.Services.AddScoped<IBankAccountRepository, BankAccountRepository>();
+builder.Services.AddScoped<IMailRepository, MailRepository>();
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("Default"));
