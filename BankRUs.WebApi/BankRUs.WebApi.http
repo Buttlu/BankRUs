@@ -1,4 +1,7 @@
 @BankRUs.WebApi_HostAddress = https://localhost:8080
+
+GET {{BankRUs.WebApi_HostAddress}}
+
 ### Open Account
 
 POST {{BankRUs.WebApi_HostAddress}}/api/accounts
@@ -8,4 +11,12 @@ Content-Type: application/json
   "lastName": "Doe",
   "socialSecurityNumber": "19900101-2013",
   "email": "john@doe.com"
+}
+
+### Open Bank Account
+
+POST {{BankRUs.WebApi_HostAddress}}/api/bank-accounts
+Content-Type: application/json
+{
+  "userId": "8c03c030-c9c7-486e-9f56-52af49e55c0c"
 }

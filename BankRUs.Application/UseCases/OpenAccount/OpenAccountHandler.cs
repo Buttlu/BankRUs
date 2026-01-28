@@ -1,13 +1,19 @@
 ﻿using BankRUs.Application.Identity;
 using BankRUs.Application.Repositories;
+using BankRUs.Application.Services;
 using BankRUs.Domain.Entities;
 
 namespace BankRUs.Application.UseCases.OpenAccount;
 // POST /api/accounts
-public class OpenAccountHandler(IIdentityService identityService, IBankAccountRepository bankAccountRepository)
+public class OpenAccountHandler(
+    IIdentityService identityService, 
+    IBankAccountRepository bankAccountRepository,
+    IEmailSender  emailSender
+    )
 {
     private readonly IIdentityService _identityService = identityService;
     private readonly IBankAccountRepository _bankAccountRepository = bankAccountRepository;
+    private readonly IEmailSender _emailSender = emailSender;
 
     public async Task<OpenAccountResult> HandleAsync(OpenAccountCommand command)
     {
@@ -26,11 +32,17 @@ public class OpenAccountHandler(IIdentityService identityService, IBankAccountRe
             accountNumber: "100.200.300",
             name: "standardkonto",
             userId: result.UserId.ToString());
-        bankAccount = await _bankAccountRepository.CreateAsync(bankAccount);
+        await _bankAccountRepository.AddAsync(bankAccount);
 
 
         // TODO: skick välkomstmail
         //      Delegera till infrastructure
+        await _emailSender.SendEmailAsync(
+            from: "no-rply@bankrus.com",
+            to: command.Email,
+            subject: "Account created",
+            body: "Your account has been created"
+            );
 
         return new OpenAccountResult(UserId: result.UserId);
     }
