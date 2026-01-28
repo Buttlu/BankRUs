@@ -1,6 +1,7 @@
 using BankRUs.Application.Identity;
 using BankRUs.Application.Repositories;
 using BankRUs.Application.UseCases.OpenAccount;
+using BankRUs.Application.UseCases.OpenBankAccount;
 using BankRUs.Infrastructure.Identity;
 using BankRUs.Infrastructure.Persistance;
 using BankRUs.Infrastructure.Repositories;
@@ -12,6 +13,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddScoped<OpenAccountHandler>();
+builder.Services.AddScoped<OpenBankAccountHandler>();
 builder.Services.AddScoped<SmtpClient>();
 builder.Services.AddScoped<IIdentityService, IdentityService>();
 builder.Services.AddScoped<IBankAccountRepository, BankAccountRepository>();

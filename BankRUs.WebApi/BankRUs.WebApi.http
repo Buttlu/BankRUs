@@ -9,3 +9,11 @@ Content-Type: application/json
   "socialSecurityNumber": "19900101-2013",
   "email": "john@doe.com"
 }
+
+### Open Additional Account
+# Take userId from above request
+POST {{BankRUs.WebApi_HostAddress}}/api/bankaccounts
+Content-Type: application/json
+{   
+  "userId": "38f35639-81b3-4c90-89cd-fc14f2a0841a"
+}

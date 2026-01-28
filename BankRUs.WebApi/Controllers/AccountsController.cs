@@ -28,7 +28,7 @@ public class AccountsController(OpenAccountHandler handler) : ControllerBase
         try {
             result = await _openAccountHandler.HandleAsync(command);
         } catch (Exception e) {
-            ModelState.AddModelError("Duplicate Entry", e.Message);
+            ModelState.AddModelError("User Error", e.Message);
             return ValidationProblem(ModelState);
         }
 
