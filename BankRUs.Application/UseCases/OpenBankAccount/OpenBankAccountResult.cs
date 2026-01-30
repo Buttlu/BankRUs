@@ -1,3 +1,8 @@
 ﻿namespace BankRUs.Application.UseCases.OpenBankAccount;
 
-public sealed record OpenBankAccountResult(Guid Id);
+public sealed record OpenBankAccountResult(
+    Guid Id, 
+    string AccountNumber, 
+    string AccountName,
+    Guid UserId
+);

@@ -18,5 +18,20 @@ Content-Type: application/json
 POST {{BankRUs.WebApi_HostAddress}}/api/bank-accounts
 Content-Type: application/json
 {
-  "userId": "8c03c030-c9c7-486e-9f56-52af49e55c0c"
+  "userId": "54615d96-b752-4cf8-a462-f90c465c8637",
+  "accountName": "Semester"
 }
+
+### Login & Generate Token
+
+POST {{BankRUs.WebApi_HostAddress}}/api/auth/login
+Content-Type: application/json
+{
+  "username": "john@doe.com",
+  "password": "Aa111!"
+}
+
+### Get Data
+
+GET {{BankRUs.WebApi_HostAddress}}/api/me
+Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJiYTVjMTFiNC03ODE1LTRlMjMtOWI3MC0xMDJlYzkyZDRmYjAiLCJlbWFpbCI6ImpvaG5AZG9lLmNvbSIsInByZWZlcnJlZF91c2VybmFtZSI6ImpvaG5AZG9lLmNvbSIsImV4cCI6MTc2OTc2NzgwOCwiaXNzIjoiQmFua1JVcy5BcGkiLCJhdWQiOiJCYW5rUlVzLkNsaWVudCJ9.Q_gStNfp4E3XN2ZJsBtpdk9Bp7eJXMLDrbuc94kyyWY

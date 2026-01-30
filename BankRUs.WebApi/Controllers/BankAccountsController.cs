@@ -14,15 +14,17 @@ public class BankAccountsController(OpenBankAccountHandler handler) : Controller
     public async Task<IActionResult> CreateBankAccount(CreateBankAccountRequestDto request)
     {
         OpenBankAccountResult openBankAccountResult = await _handler.HandleAsync(new OpenBankAccountCommand(
-            UserId: request.UserId)
+                UserId: request.UserId,
+                AccountName: request.AccountName
+            )
         );
 
         BankAccountDto response = new(
             Id: openBankAccountResult.Id,
-            Name: "standardkonto",
-            AccountNumber: "100.200.300",
+            Name: openBankAccountResult.AccountName,
+            AccountNumber: openBankAccountResult.AccountNumber,
             Balance: 0.0m,
-            UserId: request.UserId
+            UserId: openBankAccountResult.UserId
             );
 
         return Created("", response);

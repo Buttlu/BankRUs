@@ -8,12 +8,14 @@ namespace BankRUs.Application.UseCases.OpenAccount;
 public class OpenAccountHandler(
     IIdentityService identityService, 
     IBankAccountRepository bankAccountRepository,
-    IEmailSender  emailSender
+    IEmailSender  emailSender,
+    IAccountNumberGenerator accountNumberGenerator
     )
 {
     private readonly IIdentityService _identityService = identityService;
     private readonly IBankAccountRepository _bankAccountRepository = bankAccountRepository;
     private readonly IEmailSender _emailSender = emailSender;
+    private readonly IAccountNumberGenerator _accountNumberGenerator = accountNumberGenerator;
 
     public async Task<OpenAccountResult> HandleAsync(OpenAccountCommand command)
     {
@@ -29,7 +31,7 @@ public class OpenAccountHandler(
         // TODO: skapa bankkonto
         //      Delegera till infrastructure
         var bankAccount = new BankAccount(
-            accountNumber: "100.200.300",
+            accountNumber: _accountNumberGenerator.Generate(),
             name: "standardkonto",
             userId: result.UserId.ToString());
         await _bankAccountRepository.AddAsync(bankAccount);
