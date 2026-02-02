@@ -1,5 +1,5 @@
-﻿using BankRUs.Application.Repositories;
-using BankRUs.Application.Services;
+﻿using BankRUs.Application.DataObjects;
+using BankRUs.Application.Repositories;
 using BankRUs.Infrastructure.Persistance;
 using Microsoft.EntityFrameworkCore;
 

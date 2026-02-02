@@ -1,6 +1,6 @@
 ﻿using BankRUs.Domain.Entities;
 
-namespace BankRUs.Application.Services;
+namespace BankRUs.Application.DataObjects;
 
 public class Customer
 {

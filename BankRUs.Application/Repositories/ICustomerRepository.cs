@@ -1,4 +1,4 @@
-﻿using BankRUs.Application.Services;
+﻿using BankRUs.Application.DataObjects;
 
 namespace BankRUs.Application.Repositories;
 

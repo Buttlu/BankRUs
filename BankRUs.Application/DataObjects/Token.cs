@@ -1,4 +1,4 @@
-﻿namespace BankRUs.Application.Services;
+﻿namespace BankRUs.Application.DataObjects;
 
 public sealed record Token(
     string AccessToken,

@@ -1,4 +1,6 @@
-﻿namespace BankRUs.Application.Services;
+﻿using BankRUs.Application.DataObjects;
+
+namespace BankRUs.Application.Services;
 
 public interface ITokenService
 {
