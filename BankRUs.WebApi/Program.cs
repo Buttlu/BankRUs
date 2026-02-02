@@ -86,7 +86,7 @@ if (app.Environment.IsDevelopment()) {
     var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     dbContext.Database.Migrate(); 
 
-    await IdentitySeeder.SeedAsync(scope.ServiceProvider);
+    await new IdentitySeeder().SeedAsync(scope.ServiceProvider);
 }
 
 app.UseHttpsRedirection();
