@@ -1,6 +1,5 @@
 ﻿using BankRUs.Application.Services;
 using BankRUs.Infrastructure.Authentication;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -13,7 +12,7 @@ public class TokenService(IOptions<JwtOptions> options) : ITokenService
 {
     private readonly JwtOptions _jwt = options.Value;
 
-    public Token CreateToken(string userId, string email)   
+    public Token CreateToken(string userId, string email, IEnumerable<string>? roles = null)
     {
         // Användar Info
         var claims = new List<Claim> {
@@ -21,6 +20,10 @@ public class TokenService(IOptions<JwtOptions> options) : ITokenService
             new(JwtRegisteredClaimNames.Email, email),
             new(JwtRegisteredClaimNames.PreferredUsername, email)
         };
+
+        foreach (var role in roles ?? []) {
+            claims.Add(new Claim(ClaimTypes.Role, role));
+        }
 
         // Token info
         // Iss -> issuer (BankRUs.Api)

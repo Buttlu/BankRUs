@@ -19,10 +19,13 @@ public class AuthenticationService(UserManager<ApplicationUser> userManager) : I
         if (!await _userManager.CheckPasswordAsync(user, password))
             return null;
 
+        var roles = await _userManager.GetRolesAsync(user);
+
         return new AuthenticatedUser(
-            Guid.Parse(user.Id), 
-            user.UserName!,
-            user.Email!
+            UserId: Guid.Parse(user.Id), 
+            Username: user.UserName!,
+            Email: user.Email!,
+            Roles: roles
         );
     }
 }

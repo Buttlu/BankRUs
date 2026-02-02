@@ -21,8 +21,9 @@ public sealed class AuthenticateUserHandler(IAuthenticationService authenticatio
 
         // Skapa JWT token
         var token = _tokenService.CreateToken(
-            UserId: authenticatedUser.UserId.ToString(),
-            Email: authenticatedUser.Email);
+            userId: authenticatedUser.UserId.ToString(),
+            email: authenticatedUser.Email,
+            roles: authenticatedUser.Roles);
         
         // Returnera
         return AuthenticateUserResult.Succeeded(token.AccessToken, token.ExpiresAtUtc);
