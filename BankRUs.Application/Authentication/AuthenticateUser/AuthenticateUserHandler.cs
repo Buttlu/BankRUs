@@ -1,6 +1,4 @@
-﻿using BankRUs.Application.Services;
-
-namespace BankRUs.Application.Authentication.AuthenticateUser;
+﻿namespace BankRUs.Application.Authentication;
 
 public sealed class AuthenticateUserHandler(IAuthenticationService authenticationService, ITokenService tokenService)
 {

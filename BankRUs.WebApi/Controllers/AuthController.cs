@@ -1,4 +1,4 @@
-﻿using BankRUs.Application.Authentication.AuthenticateUser;
+﻿using BankRUs.Application.Authentication;
 using BankRUs.WebApi.Dtos.Auth;
 using Microsoft.AspNetCore.Mvc;
 

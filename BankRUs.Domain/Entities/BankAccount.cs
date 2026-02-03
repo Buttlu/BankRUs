@@ -32,6 +32,9 @@ public class BankAccount
 
     public void Withdraw(decimal amount)
     {
+        if (Balance - Balance < 0) {
+            throw new ArgumentException("Balance cannot be negative");
+        }
         Balance -= amount;
     }
 }
