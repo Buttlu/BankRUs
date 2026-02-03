@@ -1,7 +1,9 @@
 ﻿using BankRUs.Application.UseCases.AddBalance;
+using BankRUs.Application.UseCases.GetTransactions;
 using BankRUs.Application.UseCases.OpenBankAccount;
 using BankRUs.Application.UseCases.WithdrawBalance;
 using BankRUs.WebApi.Dtos.BankAccounts;
+using BankRUs.WebApi.Dtos.Transactions;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BankRUs.WebApi.Controllers;
@@ -11,12 +13,14 @@ namespace BankRUs.WebApi.Controllers;
 public class BankAccountsController(
     OpenBankAccountHandler bankAccountHandler, 
     AddBalanceHandler addBalanceHandler,
-    WithdrawBalanceHandler withdrawBalanceHandler) 
-    : ControllerBase
+    WithdrawBalanceHandler withdrawBalanceHandler,
+    GetTransactionsHandler getTransactionsHandler
+) : ControllerBase
 {
     private readonly OpenBankAccountHandler _bankAccountHandler = bankAccountHandler;
     private readonly AddBalanceHandler _addBalanceHandler = addBalanceHandler;
     private readonly WithdrawBalanceHandler _withdrawBalanceHandler = withdrawBalanceHandler;
+    private readonly GetTransactionsHandler _getTransactionsHandler = getTransactionsHandler;
 
     [HttpPost]
     public async Task<IActionResult> CreateBankAccount(CreateBankAccountRequestDto request)
@@ -119,6 +123,39 @@ public class BankAccountsController(
     [HttpGet("{accountId}/transactions")]
     public async Task<IActionResult> GetTransactionsFromAccount(Guid accountId, [FromQuery] TransactionQuery query)
     {
+        if (!ModelState.IsValid)
+            return ValidationProblem(ModelState);
 
+        int page = query.Page;
+        int pageSize = query.PageSize;
+        if (page < 1) page = 1;
+        if (pageSize < 1) pageSize = 1;
+        else if (pageSize > 100) pageSize = 100;
+
+        GetTransactionsResult result;
+        try {
+            result = await _getTransactionsHandler.HandleAsync(new GetTransactionsQuery(
+                BankAccountId: accountId,
+                Page: page,
+                PageSize: pageSize,
+                From: query.From,
+                To: query.To,
+                Type: query.Type,
+                Desc: query.Sort
+            ));
+        } catch (ArgumentException ae) {
+            ModelState.AddModelError("Account", ae.Message);
+            return ValidationProblem(ModelState);
+        }
+
+        var response = new ListTransactionResultDto(
+            AccountId: result.AccountId,
+            Currency: result.Currency,
+            Balance: result.Balance,
+            Paging: result.Paging,
+            Items: result.Transactions
+        );
+
+        return Ok(response);
     }
 }

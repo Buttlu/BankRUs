@@ -1,4 +1,4 @@
-﻿namespace BankRUs.WebApi.Dtos.BankAccounts;
+﻿namespace BankRUs.WebApi.Dtos.Transactions;
 
 public sealed record TransactionQuery(
     DateTime? From,
@@ -6,5 +6,5 @@ public sealed record TransactionQuery(
     string? Type,
     int Page = 1,
     int PageSize = 20,
-    string Desc = "desc"
+    string Sort = "desc"
 );

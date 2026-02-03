@@ -3,6 +3,7 @@ using BankRUs.Application.Identity;
 using BankRUs.Application.Repositories;
 using BankRUs.Application.Services;
 using BankRUs.Application.UseCases.AddBalance;
+using BankRUs.Application.UseCases.GetTransactions;
 using BankRUs.Application.UseCases.OpenAccount;
 using BankRUs.Application.UseCases.OpenBankAccount;
 using BankRUs.Application.UseCases.WithdrawBalance;
@@ -21,22 +22,34 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+
 // Add services to the container.
+// Handlers
 builder.Services.AddScoped<OpenAccountHandler>();
 builder.Services.AddScoped<AuthenticateUserHandler>();
-builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
-builder.Services.AddScoped<IAccountNumberGenerator, AccountNumberGenerator>();
-builder.Services.AddScoped<IIdentityService, IdentityService>();
-builder.Services.AddScoped<IBankAccountRepository, BankAccountRepository>();
-builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<OpenBankAccountHandler>();
 builder.Services.AddScoped<AddBalanceHandler>();
 builder.Services.AddScoped<WithdrawBalanceHandler>();
+builder.Services.AddScoped<GetTransactionsHandler>();
+
+// Repositories
+builder.Services.AddScoped<IBankAccountRepository, BankAccountRepository>();
+builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
+
+// Services
+builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
+builder.Services.AddScoped<IIdentityService, IdentityService>();
+builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddScoped<ITransactionService, TransactionService>();
 if (builder.Environment.IsDevelopment()) {
     builder.Services.AddScoped<IEmailSender, FakeEmailSender>();
 } else {
     builder.Services.AddScoped<IEmailSender, EmailSender>();
 }
+
+// Misc
+builder.Services.AddScoped<IAccountNumberGenerator, AccountNumberGenerator>();
+
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("Default"));
