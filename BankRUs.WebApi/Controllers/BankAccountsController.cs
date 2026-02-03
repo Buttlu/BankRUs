@@ -115,4 +115,10 @@ public class BankAccountsController(
 
         return Created("", resultDto);
     }
+
+    [HttpGet("{accountId}/transactions")]
+    public async Task<IActionResult> GetTransactionsFromAccount(Guid accountId, [FromQuery] TransactionQuery query)
+    {
+
+    }
 }
