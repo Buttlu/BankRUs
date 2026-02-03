@@ -47,6 +47,10 @@ if (builder.Environment.IsDevelopment()) {
     builder.Services.AddScoped<IEmailSender, EmailSender>();
 }
 
+// Settings from appsettings.json
+builder.Services.Configure<PaginationOptions>(builder.Configuration.GetSection(PaginationOptions.SectionName));
+builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection(JwtOptions.SectionName));
+
 // Misc
 builder.Services.AddScoped<IAccountNumberGenerator, AccountNumberGenerator>();
 
@@ -61,7 +65,7 @@ builder.Services
     .AddDefaultTokenProviders();
 builder.Services.AddControllers();
 
-builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection(JwtOptions.SectionName));
+
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;

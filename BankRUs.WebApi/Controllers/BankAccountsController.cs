@@ -2,9 +2,11 @@
 using BankRUs.Application.UseCases.GetTransactions;
 using BankRUs.Application.UseCases.OpenBankAccount;
 using BankRUs.Application.UseCases.WithdrawBalance;
+using BankRUs.Infrastructure.Authentication;
 using BankRUs.WebApi.Dtos.BankAccounts;
 using BankRUs.WebApi.Dtos.Transactions;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 
 namespace BankRUs.WebApi.Controllers;
 
@@ -14,13 +16,15 @@ public class BankAccountsController(
     OpenBankAccountHandler bankAccountHandler, 
     AddBalanceHandler addBalanceHandler,
     WithdrawBalanceHandler withdrawBalanceHandler,
-    GetTransactionsHandler getTransactionsHandler
+    GetTransactionsHandler getTransactionsHandler,
+    IOptions<PaginationOptions> pageOptions
 ) : ControllerBase
 {
     private readonly OpenBankAccountHandler _bankAccountHandler = bankAccountHandler;
     private readonly AddBalanceHandler _addBalanceHandler = addBalanceHandler;
     private readonly WithdrawBalanceHandler _withdrawBalanceHandler = withdrawBalanceHandler;
     private readonly GetTransactionsHandler _getTransactionsHandler = getTransactionsHandler;
+    private readonly PaginationOptions _pageOptions = pageOptions.Value;
 
     [HttpPost]
     public async Task<IActionResult> CreateBankAccount(CreateBankAccountRequestDto request)
@@ -130,7 +134,8 @@ public class BankAccountsController(
         int pageSize = query.PageSize;
         if (page < 1) page = 1;
         if (pageSize < 1) pageSize = 1;
-        else if (pageSize > 100) pageSize = 100;
+        else if (pageSize > _pageOptions.MaxPageSize) 
+            pageSize = _pageOptions.MaxPageSize;
 
         GetTransactionsResult result;
         try {
