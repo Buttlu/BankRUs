@@ -6,5 +6,4 @@ public interface IBankAccountRepository
 {
     Task AddAsync(BankAccount bankAccount);
     BankAccount? GetById(Guid bankAccountId);
-    Task CreateTransaction(Transaction transaction);
 }
