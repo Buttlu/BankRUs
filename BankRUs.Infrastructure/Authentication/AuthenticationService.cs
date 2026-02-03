@@ -1,5 +1,5 @@
-﻿using BankRUs.Application.Authentication.AuthenticateUser;
-using BankRUs.Application.Services;
+﻿using BankRUs.Application.Authentication;
+using BankRUs.Application.Authentication.AuthenticateUser;
 using BankRUs.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity;
 

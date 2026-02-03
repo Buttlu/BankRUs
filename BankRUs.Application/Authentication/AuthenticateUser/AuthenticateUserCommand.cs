@@ -1,4 +1,4 @@
-﻿namespace BankRUs.Application.Authentication.AuthenticateUser;
+﻿namespace BankRUs.Application.Authentication;
 
 public sealed record AuthenticateUserCommand(
     string Username, 
