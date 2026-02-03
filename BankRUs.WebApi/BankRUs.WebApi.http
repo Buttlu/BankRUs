@@ -18,7 +18,7 @@ Content-Type: application/json
 POST {{BankRUs.WebApi_HostAddress}}/api/bank-accounts
 Content-Type: application/json
 {
-  "userId": "54615d96-b752-4cf8-a462-f90c465c8637",
+  "userId": "bd83bc3d-552e-44e2-b4fb-096a1c92e9f0",
   "accountName": "Semester"
 }
 
@@ -29,6 +29,14 @@ Content-Type: application/json
 {
   "username": "john@doe.com",
   "password": "Aa111!"
+}
+
+### Deposit
+POST {{BankRUs.WebApi_HostAddress}}/api/bank-accounts/30655994-ca28-4161-b3ea-24ff8bb6b3bb/deposits
+Content-Type: application/json
+{
+  "amount": 250.00,
+  "reference": "Lön Januari"
 }
 
 ### Get Data
