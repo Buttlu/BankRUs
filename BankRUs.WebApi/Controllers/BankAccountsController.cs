@@ -1,20 +1,22 @@
 ﻿using BankRUs.Application.UseCases.AddBalance;
 using BankRUs.Application.UseCases.OpenBankAccount;
+using BankRUs.Application.UseCases.WithdrawBalance;
 using BankRUs.WebApi.Dtos.BankAccounts;
-using Bogus.DataSets;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using System.Security.Cryptography.Xml;
 
 namespace BankRUs.WebApi.Controllers;
 
 [Route("api/bank-accounts")]
 [ApiController]
-public class BankAccountsController(OpenBankAccountHandler bankAccountHandler, AddBalanceHandler addBalanceHandler) : ControllerBase
+public class BankAccountsController(
+    OpenBankAccountHandler bankAccountHandler, 
+    AddBalanceHandler addBalanceHandler,
+    WithdrawBalanceHandler withdrawBalanceHandler) 
+    : ControllerBase
 {
     private readonly OpenBankAccountHandler _bankAccountHandler = bankAccountHandler;
     private readonly AddBalanceHandler _addBalanceHandler = addBalanceHandler;
+    private readonly WithdrawBalanceHandler _withdrawBalanceHandler = withdrawBalanceHandler;
 
     [HttpPost]
     public async Task<IActionResult> CreateBankAccount(CreateBankAccountRequestDto request)
@@ -43,6 +45,7 @@ public class BankAccountsController(OpenBankAccountHandler bankAccountHandler, A
             ModelState.AddModelError("Amount", "Amount must be above 0");
             return ValidationProblem(ModelState);
         }
+        
         if (!ModelState.IsValid) {
             return ValidationProblem(ModelState);
         }
@@ -54,8 +57,12 @@ public class BankAccountsController(OpenBankAccountHandler bankAccountHandler, A
                 Amount: addBalanceDto.Amount,
                 Reference: addBalanceDto.Reference
             ));
-        } catch (ArgumentException ae) {
+        } catch (ArgumentException ae) { // Account not found
             ModelState.AddModelError("Account", ae.Message);
+            return ValidationProblem(ModelState);
+        } catch (ArithmeticException ae) { // Balance cannot be negative
+            ModelState.AddModelError("Insuffient funds", ae.Message);
+            return Conflict(ModelState);
         }
 
         var resultDto = new AddBalanceResultDto(
@@ -67,6 +74,43 @@ public class BankAccountsController(OpenBankAccountHandler bankAccountHandler, A
             Reference: balanceResult.Reference,
             CreatedAt: balanceResult.CreatedAt,
             BalanceAfter: balanceResult.BalanceAfter
+        );
+
+        return Created("", resultDto);
+    }
+
+    [HttpPost("{accoundId}/withdrawals")]
+    public async Task<IActionResult> WithdrawBalance(Guid accoundId, [FromBody] WithdrawBalanceDto balanceDto)
+    {
+        if (balanceDto.Amount <= 0) {
+            ModelState.AddModelError("Amount", "Amount must be above 0");
+            return ValidationProblem(ModelState);
+        }
+        
+        if (!ModelState.IsValid) {
+            return ValidationProblem(ModelState);
+        }
+
+        WithdrawBalanceResult result = default!;
+        try {
+            result = await _withdrawBalanceHandler.HandleAsync(new WithdrawBalanceCommand(
+                BankAccountId: accoundId,
+                Amount: balanceDto.Amount,
+                Reference: balanceDto.Reference
+            ));
+        } catch (ArgumentException ae) {
+            ModelState.AddModelError("Input Data Error", ae.Message);
+        }
+
+        var resultDto = new WithdrawBalanceResultDto(
+            TransactionId: result.TransactionId,
+            UserId: result.UserId,
+            Type: result.Type,
+            Amount: result.Amount,
+            Currency: result.Currency,
+            Reference: result.Reference,
+            CreatedAt: result.CreatedAt,
+            BalanceAfter: result.BalanceAfter
         );
 
         return Created("", resultDto);
