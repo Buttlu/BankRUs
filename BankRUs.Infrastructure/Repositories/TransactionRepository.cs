@@ -40,10 +40,13 @@ public class TransactionRepository(
             _ => transactions.OrderByDescending(t => t.CreatedAt),
         };
 
-        return (await transactions
+        var items = await transactions
             .Skip((query.Page - 1) * query.PageSize)
             .Take(query.PageSize)
-            .ToListAsync(),
-            transactions.Count());
+            .ToListAsync();
+
+        var count = transactions.Count();
+
+        return (items, count);
     }
 }
