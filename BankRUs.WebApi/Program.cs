@@ -5,6 +5,7 @@ using BankRUs.Application.Services;
 using BankRUs.Application.UseCases.AddBalance;
 using BankRUs.Application.UseCases.OpenAccount;
 using BankRUs.Application.UseCases.OpenBankAccount;
+using BankRUs.Application.UseCases.WithdrawBalance;
 using BankRUs.Infrastructure.Authentication;
 using BankRUs.Infrastructure.Identity;
 using BankRUs.Infrastructure.Persistance;
@@ -30,6 +31,7 @@ builder.Services.AddScoped<IBankAccountRepository, BankAccountRepository>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<OpenBankAccountHandler>();
 builder.Services.AddScoped<AddBalanceHandler>();
+builder.Services.AddScoped<WithdrawBalanceHandler>();
 if (builder.Environment.IsDevelopment()) {
     builder.Services.AddScoped<IEmailSender, FakeEmailSender>();
 } else {

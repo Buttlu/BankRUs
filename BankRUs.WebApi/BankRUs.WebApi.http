@@ -39,6 +39,14 @@ Content-Type: application/json
   "reference": "Lön Januari"
 }
 
+### Withdrawal
+POST {{BankRUs.WebApi_HostAddress}}/api/bank-accounts/30655994-ca28-4161-b3ea-24ff8bb6b3bb/withdrawals
+Content-Type: application/json
+{
+  "amount": 150.00,
+  "reference": "Skattefusk"
+}
+
 ### Get Data
 
 GET {{BankRUs.WebApi_HostAddress}}/api/me
