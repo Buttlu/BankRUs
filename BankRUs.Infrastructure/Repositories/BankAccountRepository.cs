@@ -12,15 +12,8 @@ public class BankAccountRepository(ApplicationDbContext context) : IBankAccountR
     {
         _context.BankAccounts.Add(bankAccount);
         await _context.SaveChangesAsync();
-    }
-
-    public async Task CreateTransaction(Transaction transaction)
-    {
-        _context.Transactions.Add(transaction);
-        await _context.SaveChangesAsync();
-    }
+    }    
 
     public BankAccount? GetById(Guid bankAccountId)
-        => _context.BankAccounts.Find(bankAccountId);
-    
+        => _context.BankAccounts.Find(bankAccountId);    
 }

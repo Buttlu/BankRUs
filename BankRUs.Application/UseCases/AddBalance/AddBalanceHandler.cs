@@ -3,9 +3,13 @@ using BankRUs.Domain.Entities;
 
 namespace BankRUs.Application.UseCases.AddBalance;
 
-public class AddBalanceHandler(IBankAccountRepository bankAccountRepository)
+public class AddBalanceHandler(
+    IBankAccountRepository bankAccountRepository,
+    ITransactionRepository transactionRepository
+)
 {
     private readonly IBankAccountRepository _bankAccountRepository = bankAccountRepository;
+    private readonly ITransactionRepository _transactionRepository = transactionRepository;
 
     public async Task<AddBalanceResult> HandleAsync(AddBalanceCommand command)
     {
@@ -17,6 +21,7 @@ public class AddBalanceHandler(IBankAccountRepository bankAccountRepository)
         var transaction = new Transaction {
             Id = Guid.NewGuid(),
             UserId = Guid.Parse(bankAccount.UserId),
+            AccountId = command.BankAccountId,
             Reference = command.Reference,
             CreatedAt = DateTime.UtcNow,
             Type = "Deposit",
@@ -25,11 +30,11 @@ public class AddBalanceHandler(IBankAccountRepository bankAccountRepository)
             BalanceAfter = bankAccount.Balance
         };
 
-        await _bankAccountRepository.CreateTransaction(transaction);
+        await _transactionRepository.CreateTransaction(transaction);
 
         return new AddBalanceResult (
             TransactionId: transaction.Id,
-            UserId: transaction.UserId,
+            UserId: transaction.UserId,            
             Type: transaction.Type,
             Amount: transaction.Amount,
             Currency: transaction.Currency,
