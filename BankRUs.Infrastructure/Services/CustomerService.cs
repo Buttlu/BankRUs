@@ -1,5 +1,8 @@
 ﻿using BankRUs.Application.Identity;
+using BankRUs.Application.Pagination;
+using BankRUs.Application.Repositories;
 using BankRUs.Application.Services;
+using BankRUs.Application.UseCases.GetCustomers;
 using BankRUs.Infrastructure.Authentication;
 using BankRUs.Infrastructure.Identity;
 using BankRUs.Infrastructure.Persistance;
@@ -11,30 +14,27 @@ namespace BankRUs.Infrastructure.Services;
 
 public class CustomerService(
     UserManager<ApplicationUser> userManager,
-    ApplicationDbContext context,
-    IOptions<PaginationOptions> pageOptions
+    ICustomerRepository customerRepository
 ) : ICustomerService
 {
     private readonly UserManager<ApplicationUser> _userManager = userManager;
-    private readonly ApplicationDbContext _context = context;
-    private readonly PaginationOptions _pageOptions = pageOptions.Value;
+    private readonly ICustomerRepository _customerRepository = customerRepository;
 
-    public async Task<IReadOnlyList<CustomerDto>> GetAll(int page = 1, int pageSize = 20)
+    public async Task<PagedResponse<CustomerDto>> GetAllAsync(GetCustomersQuery query)
     {
-        if (page < 1) page = 1;
-        if (pageSize < 1) pageSize = 1;
-        else if (pageSize > _pageOptions.MaxPageSize) pageSize = _pageOptions.MaxPageSize;
-        return await _context.Users
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize)
-            .Select(a => new CustomerDto(
-                CustomerId: Guid.Parse(a.Id),
-                FirstName: a.FirstName,
-                LastName: a.LastName,
-                Email: a.Email!,
-                BankAccounts: null
-            ))
-            .ToListAsync();
+        var (customers, customerCount) = await _customerRepository.GetAllAsync(query);
+        
+        int totalPages = (int)Math.Ceiling((double)customerCount / query.PageSize);
+
+        return new PagedResponse<CustomerDto>(
+            Data: customers,
+            MetaData: new PageMetaData(
+                Page: query.Page,
+                PageSize: query.PageSize,
+                TotalCount: customerCount,
+                TotalPages: totalPages
+            )
+        );
     }
 
     public async Task<CustomerDto?> GetById(Guid Id)
