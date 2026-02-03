@@ -3,9 +3,13 @@ using BankRUs.Domain.Entities;
 
 namespace BankRUs.Application.UseCases.WithdrawBalance;
 
-public class WithdrawBalanceHandler(IBankAccountRepository bankAccountRepository)
+public class WithdrawBalanceHandler(
+    IBankAccountRepository bankAccountRepository,
+    ITransactionRepository transactionRepository
+)
 {
     private readonly IBankAccountRepository _bankAccountRepository = bankAccountRepository;
+    private readonly ITransactionRepository _transactionRepository = transactionRepository;
 
     public async Task<WithdrawBalanceResult> HandleAsync(WithdrawBalanceCommand command)
     {
@@ -28,7 +32,7 @@ public class WithdrawBalanceHandler(IBankAccountRepository bankAccountRepository
             BalanceAfter = bankAccount.Balance
         };
 
-        await _bankAccountRepository.CreateTransaction(transaction);
+        await _transactionRepository.CreateTransaction(transaction);
 
         return new WithdrawBalanceResult (
             TransactionId: transaction.Id,
