@@ -1,5 +1,4 @@
-﻿using BankRUs.Infrastructure.Persistance;
-using Bogus;
+﻿using Bogus;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -12,16 +11,15 @@ public class IdentitySeeder
 
     public async Task SeedAsync(IServiceProvider services)
     {
-        // Seeda data
-        //  - roller
-
         _roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
         _userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
         
         await SeedRolesAsync();
 
         if (await _userManager.FindByEmailAsync("admin@bankrus.se") is null) {
-            await CreateUserAsync("admin@bankrus.se", "Admin", "Adminsson", "19800101-1111", "Aa111!");
+            var user = await CreateUserAsync("admin@bankrus.se", "Admin", "Adminsson", "19800101-1111", "Aa111!");
+            await _userManager.AddToRoleAsync(user, Roles.CustomerService);
+            //await _userManager.AddToRoleAsync(user, Roles.Customer);
             await SeedUsers(200);
         }
 
