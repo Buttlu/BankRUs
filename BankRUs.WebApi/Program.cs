@@ -41,6 +41,7 @@ builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 builder.Services.AddScoped<IIdentityService, IdentityService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<ITransactionService, TransactionService>();
+builder.Services.AddScoped<ICustomerService, CustomerService>();
 if (builder.Environment.IsDevelopment()) {
     builder.Services.AddScoped<IEmailSender, FakeEmailSender>();
 } else {
