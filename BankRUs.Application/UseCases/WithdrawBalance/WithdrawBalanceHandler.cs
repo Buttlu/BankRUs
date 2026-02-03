@@ -1,25 +1,28 @@
 ﻿using BankRUs.Application.Repositories;
 using BankRUs.Domain.Entities;
 
-namespace BankRUs.Application.UseCases.AddBalance;
+namespace BankRUs.Application.UseCases.WithdrawBalance;
 
-public class AddBalanceHandler(IBankAccountRepository bankAccountRepository)
+public class WithdrawBalanceHandler(IBankAccountRepository bankAccountRepository)
 {
     private readonly IBankAccountRepository _bankAccountRepository = bankAccountRepository;
 
-    public async Task<AddBalanceResult> HandleAsync(AddBalanceCommand command)
+    public async Task<WithdrawBalanceResult> HandleAsync(WithdrawBalanceCommand command)
     {
-        var bankAccount = _bankAccountRepository.GetById(command.BankAccountId) 
-            ?? throw new ArgumentException("Invalid ");
-
-        bankAccount.Deposit(amount: command.Amount);
+        var bankAccount = _bankAccountRepository.GetById(command.BankAccountId)
+            ?? throw new ArgumentException("Bank Account Not Found");
+        try {
+            bankAccount.Withdraw(command.Amount);
+        } catch (ArgumentException ae) {
+            throw new ArithmeticException(ae.Message);
+        }
 
         var transaction = new Transaction {
             Id = Guid.NewGuid(),
             UserId = Guid.Parse(bankAccount.UserId),
             Reference = command.Reference,
             CreatedAt = DateTime.UtcNow,
-            Type = "Deposit",
+            Type = "Withdrawal",
             Currency = "SEK",
             Amount = command.Amount,
             BalanceAfter = bankAccount.Balance
@@ -27,7 +30,7 @@ public class AddBalanceHandler(IBankAccountRepository bankAccountRepository)
 
         await _bankAccountRepository.CreateTransaction(transaction);
 
-        return new AddBalanceResult (
+        return new WithdrawBalanceResult (
             TransactionId: transaction.Id,
             UserId: transaction.UserId,
             Type: transaction.Type,
