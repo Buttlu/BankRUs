@@ -1,5 +1,4 @@
 ﻿using BankRUs.Application.UseCases.GetCustomers;
-using BankRUs.Domain.Entities;
 using BankRUs.Infrastructure.Authentication;
 using BankRUs.Infrastructure.Identity;
 using BankRUs.WebApi.Dtos.BankAccounts;
@@ -7,7 +6,6 @@ using BankRUs.WebApi.Dtos.Customer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using System.Collections.Generic;
 
 namespace BankRUs.WebApi.Controllers;
 
@@ -33,7 +31,9 @@ public class CustomersController(
 
         var result = await _getCustomersHandler.GetAllAsync(new GetCustomersQuery(
             Page: page,
-            PageSize: pageSize
+            PageSize: pageSize,
+            Ssn: requestDto.Ssn,
+            Email: requestDto.Email
         ));
 
         var response = new GetAllCustomersResponseDto(
