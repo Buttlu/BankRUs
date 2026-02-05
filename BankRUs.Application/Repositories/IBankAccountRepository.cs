@@ -6,4 +6,5 @@ public interface IBankAccountRepository
 {
     Task AddAsync(BankAccount bankAccount);
     BankAccount? GetById(Guid bankAccountId);
+    Task<IReadOnlyList<BankAccount>> GetByUserId(Guid userId);
 }

@@ -14,11 +14,13 @@ namespace BankRUs.Infrastructure.Services;
 
 public class CustomerService(
     UserManager<ApplicationUser> userManager,
-    ICustomerRepository customerRepository
+    ICustomerRepository customerRepository,
+    IBankAccountRepository bankAccountRepository
 ) : ICustomerService
 {
     private readonly UserManager<ApplicationUser> _userManager = userManager;
     private readonly ICustomerRepository _customerRepository = customerRepository;
+    private readonly IBankAccountRepository _bankAccountRepository = bankAccountRepository;
 
     public async Task<PagedResponse<CustomerDto>> GetAllAsync(GetCustomersQuery query)
     {
@@ -37,19 +39,22 @@ public class CustomerService(
         );
     }
 
-    public async Task<CustomerDto?> GetById(Guid Id)
+    public async Task<CustomerDto?> GetByIdAsync(Guid Id)
     {
         var user = await _userManager.FindByIdAsync(Id.ToString());
         
         if (user is null) 
             return null;
-        
+
+        var bankAccounts = await _bankAccountRepository.GetByUserId(Id);
+
         return new CustomerDto(
             CustomerId: Guid.Parse(user.Id),
                 FirstName: user.FirstName,
                 LastName: user.LastName,
                 Email: user.Email!,
-                BankAccounts: null
+                SocialSecurityNumber: user.SocialSecurityNumber,
+                BankAccounts: bankAccounts
         );
     }
 }

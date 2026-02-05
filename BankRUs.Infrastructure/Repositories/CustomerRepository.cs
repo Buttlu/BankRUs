@@ -22,6 +22,7 @@ public class CustomerRepository(ApplicationDbContext context) : ICustomerReposit
                 FirstName: a.FirstName,
                 LastName: a.LastName,
                 Email: a.Email!,
+                SocialSecurityNumber: a.SocialSecurityNumber,
                 BankAccounts: null
             ))
             .ToListAsync();

@@ -7,6 +7,6 @@ namespace BankRUs.Application.Services;
 public interface ICustomerService
 {
     Task<PagedResponse<CustomerDto>> GetAllAsync(GetCustomersQuery query);
-    Task<CustomerDto?> GetById(Guid Id);
+    Task<CustomerDto?> GetByIdAsync(Guid Id);
 }
 
