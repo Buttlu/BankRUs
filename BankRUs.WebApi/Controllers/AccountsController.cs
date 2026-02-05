@@ -1,5 +1,7 @@
 ﻿using BankRUs.Application.UseCases.OpenAccount;
 using BankRUs.WebApi.Dtos.Accounts;
+using BankRUs.WebApi.Dtos.Customer;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BankRUs.WebApi.Controllers;
@@ -35,5 +37,16 @@ public class AccountsController(OpenAccountHandler handler) : ControllerBase
         CreateAccountResponseDto response = new(result.UserId);
 
         return Created("", new { response.UserId });
+    }
+
+    [HttpPatch("{id}")]
+    public async Task<IActionResult> Patch(
+        Guid id,
+        [FromBody] JsonPatchDocument<UpdateUserDto> patchDoc
+    )
+    {
+        if (patchDoc is null) return BadRequest();
+
+        var customer = 
     }
 }

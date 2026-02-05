@@ -70,8 +70,10 @@ builder.Services
     .AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
-builder.Services.AddControllers();
 
+builder.Services.
+    AddControllers()
+    .AddNewtonsoftJson();
 
 builder.Services.AddAuthentication(options =>
 {
