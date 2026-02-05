@@ -5,5 +5,5 @@ public record BankAccountDto(
     string Name, 
     string AccountNumber, 
     decimal Balance, 
-    Guid UserId
+    Guid? UserId
 );

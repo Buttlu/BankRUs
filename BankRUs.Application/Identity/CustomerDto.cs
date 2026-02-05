@@ -7,5 +7,6 @@ public record CustomerDto(
     string FirstName,
     string LastName,
     string Email,
+    string SocialSecurityNumber,
     IReadOnlyList<BankAccount>? BankAccounts
 );
