@@ -6,10 +6,12 @@ namespace BankRUs.Application.UseCases.OpenBankAccount;
 
 public class OpenBankAccountHandler(
     IBankAccountRepository repository,
-    IAccountNumberGenerator accountNumberGenerator
+    IAccountNumberGenerator accountNumberGenerator,
+    IUnitOfWork unitOfWork
 )    
 {
     private readonly IAccountNumberGenerator _accountNumberGenerator = accountNumberGenerator;
+    private readonly IUnitOfWork _unitOfWork = unitOfWork;
     private readonly IBankAccountRepository _bankAccountRepository = repository;
 
     public async Task<OpenBankAccountResult> HandleAsync(OpenBankAccountCommand command)
@@ -20,8 +22,9 @@ public class OpenBankAccountHandler(
             accountNumber: _accountNumberGenerator.Generate(),
             name: command.AccountName ?? "standardkonto",
             userId: command.UserId.ToString());
-        await _bankAccountRepository.AddAsync(bankAccount);
-        
+        _bankAccountRepository.Add(bankAccount);
+        await _unitOfWork.SaveAsync();
+
         return new OpenBankAccountResult(
             Id: bankAccount.Id,
             AccountNumber: bankAccount.AccountNumber,
