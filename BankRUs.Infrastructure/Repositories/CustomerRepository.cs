@@ -1,6 +1,8 @@
 ﻿using BankRUs.Application.Identity;
 using BankRUs.Application.Repositories;
 using BankRUs.Application.UseCases.GetCustomers;
+using BankRUs.Application.UseCases.UpdateAccount;
+using BankRUs.Infrastructure.Identity;
 using BankRUs.Infrastructure.Persistance;
 using Microsoft.EntityFrameworkCore;
 
@@ -34,5 +36,39 @@ public class CustomerRepository(ApplicationDbContext context) : ICustomerReposit
             .ToListAsync();
 
         return (customers, customerQuery.Count());
+    }
+
+    public async Task<CustomerDto?> GetByIdAsync(string id)
+    {
+        var user = await _context.Users
+            .AsNoTracking()
+            .FirstOrDefaultAsync(c => c.Id == id);
+
+        if (user is null) 
+            return null;
+
+        return new CustomerDto(
+            CustomerId: Guid.Parse(user.Id),
+            FirstName: user.FirstName,
+            LastName: user.LastName,
+            Email: user.Email!,
+            SocialSecurityNumber: user.SocialSecurityNumber, 
+            BankAccounts: null
+        );
+    }              
+
+    public async Task UpdateUserAsync(Guid userId, UpdateUserDto updateDto)
+    {
+        string userIdStr = userId.ToString();
+        ApplicationUser user = await _context.Users
+            .AsNoTracking()
+            .FirstAsync(u => u.Id == userIdStr);
+        
+        user.FirstName = updateDto.FirstName!;
+        user.LastName = updateDto.LastName!;
+        user.Email = updateDto.Email!;
+        user.SocialSecurityNumber = updateDto.SocialSecuritNumber!;
+
+        _context.Users.Update(user);
     }
 }

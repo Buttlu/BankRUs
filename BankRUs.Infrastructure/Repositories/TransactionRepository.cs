@@ -14,11 +14,11 @@ public class TransactionRepository(
     public async Task CreateTransaction(Transaction transaction)
     {
         _context.Transactions.Add(transaction);
-        await _context.SaveChangesAsync();
     }
 
     public async Task<IReadOnlyList<Transaction>> GetFromBankAccountId(Guid bankAccountId)
         => await _context.Transactions
+            .AsNoTracking()
             .Where(t => t.AccountId == bankAccountId)
             .ToListAsync();
 

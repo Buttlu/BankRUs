@@ -12,7 +12,7 @@ public class GetTransactionsHandler(ITransactionService transactionService, IBan
     public async Task<GetTransactionsResult> HandleAsync(GetTransactionsQuery query)
     {
         var pageResult = await _transactionService.GetTransactionsAsPageResultAsync(query);
-        var bankAccount = _bankAccountRepository.GetById(query.BankAccountId)
+        var bankAccount = await _bankAccountRepository.GetById(query.BankAccountId)
             ?? throw new ArgumentException("Bank Account not found");
 
         return new GetTransactionsResult(

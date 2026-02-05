@@ -1,14 +1,18 @@
 ﻿using BankRUs.Application.UseCases.OpenAccount;
+using BankRUs.Application.UseCases.UpdateAccount;
 using BankRUs.WebApi.Dtos.Accounts;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BankRUs.WebApi.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class AccountsController(OpenAccountHandler handler) : ControllerBase
+public class AccountsController(
+    OpenAccountHandler openAccountHandler
+) : ControllerBase
 {
-    private readonly OpenAccountHandler _openAccountHandler = handler;
+    private readonly OpenAccountHandler _openAccountHandler = openAccountHandler;
 
     [HttpPost]
     public async Task<IActionResult> Create(CreateAccountRequestDto requestDto)
@@ -35,5 +39,5 @@ public class AccountsController(OpenAccountHandler handler) : ControllerBase
         CreateAccountResponseDto response = new(result.UserId);
 
         return Created("", new { response.UserId });
-    }
+    }    
 }

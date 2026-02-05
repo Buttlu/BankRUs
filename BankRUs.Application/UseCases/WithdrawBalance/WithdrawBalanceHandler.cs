@@ -13,7 +13,7 @@ public class WithdrawBalanceHandler(
 
     public async Task<WithdrawBalanceResult> HandleAsync(WithdrawBalanceCommand command)
     {
-        var bankAccount = _bankAccountRepository.GetById(command.BankAccountId)
+        var bankAccount = await _bankAccountRepository.GetById(command.BankAccountId)
             ?? throw new ArgumentException("Bank Account Not Found");
         try {
             bankAccount.Withdraw(command.Amount);

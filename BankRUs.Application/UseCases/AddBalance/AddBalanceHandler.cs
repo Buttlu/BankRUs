@@ -13,7 +13,7 @@ public class AddBalanceHandler(
 
     public async Task<AddBalanceResult> HandleAsync(AddBalanceCommand command)
     {
-        var bankAccount = _bankAccountRepository.GetById(command.BankAccountId) 
+        var bankAccount = await _bankAccountRepository.GetById(command.BankAccountId) 
             ?? throw new ArgumentException("Invalid ");
 
         bankAccount.Deposit(amount: command.Amount);
