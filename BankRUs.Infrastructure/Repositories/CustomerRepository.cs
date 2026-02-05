@@ -14,8 +14,14 @@ public class CustomerRepository(ApplicationDbContext context) : ICustomerReposit
     {
         var customerQuery = _context.Users
             .AsNoTracking();
-        
-        var customers = await customerQuery.Skip((query.Page - 1) * query.PageSize)
+
+        if (query.Ssn is not null)
+            customerQuery = customerQuery.Where(c => c.SocialSecurityNumber.Contains(query.Ssn));
+        if (query.Email is not null)
+            customerQuery = customerQuery.Where(c => c.Email!.Contains(query.Email));
+
+        var customers = await customerQuery
+            .Skip((query.Page - 1) * query.PageSize)
             .Take(query.PageSize)
             .Select(a => new CustomerDto(
                 CustomerId: Guid.Parse(a.Id),
