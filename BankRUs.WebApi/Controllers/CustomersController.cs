@@ -1,26 +1,34 @@
-﻿using BankRUs.Application.UseCases.GetCustomers;
+﻿using BankRUs.Application.Services;
+using BankRUs.Application.UseCases.GetCustomers;
+using BankRUs.Application.UseCases.UpdateAccount;
 using BankRUs.Infrastructure.Authentication;
 using BankRUs.Infrastructure.Identity;
 using BankRUs.WebApi.Dtos.BankAccounts;
 using BankRUs.WebApi.Dtos.Customer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 
 namespace BankRUs.WebApi.Controllers;
 
 [Route("api/[controller]")]
-[Authorize(Roles = Roles.CustomerService)]
+[Authorize]
 [ApiController]
 public class CustomersController(
     GetCustomersHandler getCustomersHandler,
-    IOptions<PaginationOptions> pageOptions
+    IOptions<PaginationOptions> pageOptions,
+    UpdateAccountHandler updateAccountHandler,
+    ICustomerService customerService
 ) : ControllerBase
 {
     private readonly PaginationOptions _pageOptions = pageOptions.Value;
     private readonly GetCustomersHandler _getCustomersHandler = getCustomersHandler;
+    private readonly UpdateAccountHandler _updateAccountHandler = updateAccountHandler;
+    private readonly ICustomerService _customerService = customerService;
 
     [HttpGet]
+    [Authorize(Roles = Roles.CustomerService)]
     public async Task<IActionResult> GetAll([FromQuery] CustomerRequestDto requestDto)
     {
         int page = requestDto.Page ?? 1;
@@ -48,6 +56,7 @@ public class CustomersController(
     }
 
     [HttpGet("{id}")]
+    [Authorize(Roles = Roles.CustomerService)]
     public async Task<IActionResult> GetById(Guid id)
     {
         GetCustomerByIdResult result;
@@ -75,5 +84,43 @@ public class CustomersController(
         );
 
         return Ok(response);
+    }
+
+    [HttpPatch("{id}")]
+    [Authorize(Roles = $"{Roles.Customer},{Roles.CustomerService}")]
+    public async Task<IActionResult> Patch(
+        Guid id,
+        [FromBody] JsonPatchDocument<UpdateUserDto> patchDoc
+    )
+    {
+        if (patchDoc is null) return BadRequest();
+
+        UpdateAccountResult result;
+        try {
+            result = await _updateAccountHandler.HandleAsync(new UpdateAccountCommand(
+                Id: id,
+                PatchDocument: patchDoc,
+                ModelState: ModelState
+            ));
+        } catch (ArgumentException) {
+            return NotFound();
+        }
+
+        var updateDto = new UpdateUserDto(
+            FirstName: result.FirstName,
+            LastName: result.LastName,
+            Email: result.Email,
+            SocialSecuritNumber: result.SocialSecurityNumber
+        );
+
+        patchDoc.ApplyTo(updateDto, ModelState);
+
+        TryValidateModel(ModelState);
+        if (!ModelState.IsValid)
+            return ValidationProblem(ModelState);
+
+        await _customerService.UpdateCustomerInfo(result.UserId, updateDto);
+
+        return NoContent();
     }
 }
