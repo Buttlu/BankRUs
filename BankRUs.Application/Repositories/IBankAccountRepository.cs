@@ -5,6 +5,6 @@ namespace BankRUs.Application.Repositories;
 public interface IBankAccountRepository
 {
     Task AddAsync(BankAccount bankAccount);
-    BankAccount? GetById(Guid bankAccountId);
+    Task<BankAccount?> GetById(Guid bankAccountId);
     Task<IReadOnlyList<BankAccount>> GetByUserId(Guid userId);
 }

@@ -19,6 +19,7 @@ public class TransactionRepository(
 
     public async Task<IReadOnlyList<Transaction>> GetFromBankAccountId(Guid bankAccountId)
         => await _context.Transactions
+            .AsNoTracking()
             .Where(t => t.AccountId == bankAccountId)
             .ToListAsync();
 
