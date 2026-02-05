@@ -3,24 +3,19 @@ using BankRUs.Application.Pagination;
 using BankRUs.Application.Repositories;
 using BankRUs.Application.Services;
 using BankRUs.Application.UseCases.GetCustomers;
-using BankRUs.Infrastructure.Authentication;
-using BankRUs.Infrastructure.Identity;
-using BankRUs.Infrastructure.Persistance;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
+using BankRUs.Application.UseCases.UpdateAccount;
 
 namespace BankRUs.Infrastructure.Services;
 
 public class CustomerService(
-    UserManager<ApplicationUser> userManager,
     ICustomerRepository customerRepository,
-    IBankAccountRepository bankAccountRepository
+    IBankAccountRepository bankAccountRepository,
+    IUnitOfWork unitOfWork
 ) : ICustomerService
 {
-    private readonly UserManager<ApplicationUser> _userManager = userManager;
     private readonly ICustomerRepository _customerRepository = customerRepository;
     private readonly IBankAccountRepository _bankAccountRepository = bankAccountRepository;
+    private readonly IUnitOfWork _unitOfWork = unitOfWork;
 
     public async Task<PagedResponse<CustomerDto>> GetAllAsync(GetCustomersQuery query)
     {
@@ -41,7 +36,7 @@ public class CustomerService(
 
     public async Task<CustomerDto?> GetByIdAsync(Guid Id)
     {
-        var user = await _userManager.FindByIdAsync(Id.ToString());
+        var user = await _customerRepository.GetByIdAsync(Id.ToString());
         
         if (user is null) 
             return null;
@@ -49,12 +44,18 @@ public class CustomerService(
         var bankAccounts = await _bankAccountRepository.GetByUserId(Id);
 
         return new CustomerDto(
-            CustomerId: Guid.Parse(user.Id),
+            CustomerId: user.CustomerId,
                 FirstName: user.FirstName,
                 LastName: user.LastName,
                 Email: user.Email!,
                 SocialSecurityNumber: user.SocialSecurityNumber,
                 BankAccounts: bankAccounts
         );
+    }
+
+    public async Task UpdateCustomerInfo(Guid userId, UpdateUserDto updateDto)
+    {
+        await _customerRepository.UpdateUserAsync(userId, updateDto);
+        await _unitOfWork.SaveAsync();
     }
 }
