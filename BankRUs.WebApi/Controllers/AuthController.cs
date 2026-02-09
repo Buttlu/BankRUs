@@ -10,8 +10,12 @@ public class AuthController(AuthenticateUserHandler authenticateUserHandler) : C
 {
     private readonly AuthenticateUserHandler _authenticateUserHandler = authenticateUserHandler;
 
+    [Consumes("application/json")]
+    [Produces("application/json")]
+    [ProducesResponseType(typeof(LoginResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [HttpPost("login")]
-    public async Task<ActionResult<LoginResponseDto>> Login(LoginRequestDto request)
+    public async Task<IActionResult> Login([FromBody] LoginRequestDto request)
     {
         var result = await _authenticateUserHandler.HandleAsync(new AuthenticateUserCommand(
             request.Username,
