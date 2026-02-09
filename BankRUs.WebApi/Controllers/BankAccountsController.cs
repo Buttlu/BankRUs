@@ -76,9 +76,6 @@ public class BankAccountsController(
         } catch (ArgumentException ae) { // Account not found
             ModelState.AddModelError("Account", ae.Message);
             return ValidationProblem(ModelState);
-        } catch (ArithmeticException ae) { // Balance cannot be negative
-            ModelState.AddModelError("Insuffient funds", ae.Message);
-            return Conflict(ModelState);
         }
 
         var resultDto = new AddBalanceResultDto(
@@ -120,6 +117,9 @@ public class BankAccountsController(
             ));
         } catch (ArgumentException ae) {
             ModelState.AddModelError("Input Data Error", ae.Message);
+        } catch (ArithmeticException ae) { // Balance cannot be negative
+            ModelState.AddModelError("Insuffient funds", ae.Message);
+            return Conflict(ModelState);
         }
 
         var resultDto = new WithdrawBalanceResultDto(

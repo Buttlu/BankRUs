@@ -27,4 +27,7 @@ public class BankAccountRepository(
         .AsNoTracking()
         .Where(b => b.UserId == userId.ToString())
         .ToListAsync();
+
+    public void UpdateBalance(BankAccount bankAccount)
+        => _context.BankAccounts.Update(bankAccount);
 }
