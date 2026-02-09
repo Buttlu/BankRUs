@@ -33,7 +33,7 @@ public class BankAccount
     public void Withdraw(decimal amount)
     {
         if ((Balance - amount) < 0) {
-            throw new ArgumentException($"Balance is {Balance} but withdrawal amount is {amount}");
+            throw new ArithmeticException($"Balance is {Balance} but withdrawal amount is {amount}");
         }
         Balance -= amount;
     }

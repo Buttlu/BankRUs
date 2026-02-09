@@ -1,37 +1,17 @@
 ﻿using BankRUs.Application.Repositories;
+using BankRUs.Application.Services;
 using BankRUs.Domain.Entities;
 
 namespace BankRUs.Application.UseCases.AddBalance;
 
-public class AddBalanceHandler(
-    IBankAccountRepository bankAccountRepository,
-    ITransactionRepository transactionRepository
-)
+public class AddBalanceHandler(ITransactionService transactionService)
 {
-    private readonly IBankAccountRepository _bankAccountRepository = bankAccountRepository;
-    private readonly ITransactionRepository _transactionRepository = transactionRepository;
+    private readonly ITransactionService _transactionService = transactionService;
 
     public async Task<AddBalanceResult> HandleAsync(AddBalanceCommand command)
     {
-        var bankAccount = await _bankAccountRepository.GetById(command.BankAccountId) 
-            ?? throw new ArgumentException("Invalid ");
-
-        bankAccount.Deposit(amount: command.Amount);
-
-        var transaction = new Transaction {
-            Id = Guid.NewGuid(),
-            UserId = Guid.Parse(bankAccount.UserId),
-            AccountId = command.BankAccountId,
-            Reference = command.Reference,
-            CreatedAt = DateTime.UtcNow,
-            Type = "Deposit",
-            Currency = "SEK",
-            Amount = command.Amount,
-            BalanceAfter = bankAccount.Balance
-        };
-
-        await _transactionRepository.CreateTransaction(transaction);
-
+        var transaction = await _transactionService.AddBalance(command);
+        
         return new AddBalanceResult (
             TransactionId: transaction.Id,
             UserId: transaction.UserId,            
