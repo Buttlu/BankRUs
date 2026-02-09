@@ -19,6 +19,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Scalar.AspNetCore;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -56,6 +57,18 @@ builder.Services.AddScoped<ICustomerService, CustomerService>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 if (builder.Environment.IsDevelopment()) {
     builder.Services.AddScoped<IEmailSender, FakeEmailSender>();
+
+    builder.Services.AddOpenApi(options =>
+    {
+        options.AddDocumentTransformer((document, context, cancellationToken) =>
+        {
+            document.Info.Title = "Bank-R-Us Api";
+            document.Info.Description = "Public Bank-R-Us Api";
+            document.Info.Version = "v1";
+            return Task.CompletedTask;
+        });
+    });
+    builder.Services.AddEndpointsApiExplorer();
 } else {
     builder.Services.AddScoped<IEmailSender, EmailSender>();
 }
@@ -123,6 +136,9 @@ if (app.Environment.IsDevelopment()) {
     dbContext.Database.Migrate(); 
 
     await new IdentitySeeder().SeedAsync(scope.ServiceProvider);
+
+    app.MapOpenApi();
+    app.MapScalarApiReference();
 }
 
 app.UseHttpsRedirection();
