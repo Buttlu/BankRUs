@@ -31,7 +31,7 @@ public class BankAccountsController(
     [ProducesResponseType(typeof(BankAccountDto), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [HttpPost]
-    public async Task<IActionResult> CreateBankAccount(CreateBankAccountRequestDto request)
+    public async Task<IActionResult> CreateBankAccount([FromBody] CreateBankAccountRequestDto request)
     {
         OpenBankAccountResult openBankAccountResult = await _bankAccountHandler.HandleAsync(new OpenBankAccountCommand(
                 UserId: request.UserId,

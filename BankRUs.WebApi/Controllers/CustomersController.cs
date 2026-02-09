@@ -98,7 +98,7 @@ public class CustomersController(
         return Ok(response);
     }
 
-    [Consumes("application/json")]
+    [Consumes("application/json-patch+json")]
     [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]    
