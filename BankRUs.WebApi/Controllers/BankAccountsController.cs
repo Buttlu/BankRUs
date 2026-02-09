@@ -26,8 +26,12 @@ public class BankAccountsController(
     private readonly GetTransactionsHandler _getTransactionsHandler = getTransactionsHandler;
     private readonly PaginationOptions _pageOptions = pageOptions.Value;
 
+    [Consumes("application/json")]
+    [Produces("application/json")]
+    [ProducesResponseType(typeof(BankAccountDto), StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     [HttpPost]
-    public async Task<IActionResult> CreateBankAccount(CreateBankAccountRequestDto request)
+    public async Task<IActionResult> CreateBankAccount([FromBody] CreateBankAccountRequestDto request)
     {
         OpenBankAccountResult openBankAccountResult = await _bankAccountHandler.HandleAsync(new OpenBankAccountCommand(
                 UserId: request.UserId,
@@ -46,8 +50,12 @@ public class BankAccountsController(
         return Created("", response);
     }
 
+    [Consumes("application/json")]
+    [Produces("application/json")]
+    [ProducesResponseType(typeof(AddBalanceResultDto), StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [HttpPost("{accoundId}/deposits")]
-    public async Task<IActionResult> AddBalance(Guid accoundId, [FromBody] AddBalanceDto addBalanceDto)
+    public async Task<IActionResult> AddBalance([FromRoute] Guid accoundId, [FromBody] AddBalanceDto addBalanceDto)
     {
         if (addBalanceDto.Amount <= 0) {
             ModelState.AddModelError("Amount", "Amount must be above 0");
@@ -87,8 +95,12 @@ public class BankAccountsController(
         return Created("", resultDto);
     }
 
+    [Consumes("application/json")]
+    [Produces("application/json")]
+    [ProducesResponseType(typeof(WithdrawBalanceResultDto), StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [HttpPost("{accoundId}/withdrawals")]
-    public async Task<IActionResult> WithdrawBalance(Guid accoundId, [FromBody] WithdrawBalanceDto balanceDto)
+    public async Task<IActionResult> WithdrawBalance([FromRoute] Guid accoundId, [FromBody] WithdrawBalanceDto balanceDto)
     {
         if (balanceDto.Amount <= 0) {
             ModelState.AddModelError("Amount", "Amount must be above 0");
@@ -123,9 +135,12 @@ public class BankAccountsController(
 
         return Created("", resultDto);
     }
-
+    [Consumes("application/json")]
+    [Produces("application/json")]
+    [ProducesResponseType(typeof(ListTransactionResultDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [HttpGet("{accountId}/transactions")]
-    public async Task<IActionResult> GetTransactionsFromAccount(Guid accountId, [FromQuery] TransactionQuery query)
+    public async Task<IActionResult> GetTransactionsFromAccount([FromRoute] Guid accountId, [FromQuery] TransactionQuery query)
     {
         if (!ModelState.IsValid)
             return ValidationProblem(ModelState);

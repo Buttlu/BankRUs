@@ -16,6 +16,7 @@ namespace BankRUs.WebApi.Controllers;
 [Route("api/[controller]")]
 [Authorize]
 [ApiController]
+[ProducesResponseType(StatusCodes.Status401Unauthorized)]
 public class CustomersController(
     GetCustomersHandler getCustomersHandler,
     UpdateAccountHandler updateAccountHandler,
@@ -31,6 +32,9 @@ public class CustomersController(
     private readonly DeleteCustomerHandler _deleteCustomerHandler = deleteCustomerHandler;
     private readonly ICustomerService _customerService = customerService;
 
+    [Consumes("application/json")]
+    [Produces("application/json")]
+    [ProducesResponseType(typeof(GetAllCustomersResponseDto), StatusCodes.Status200OK)]
     [HttpGet]
     [Authorize(Roles = Roles.CustomerService)]
     public async Task<IActionResult> GetAll([FromQuery] CustomerRequestDto requestDto)
@@ -59,9 +63,13 @@ public class CustomersController(
         return Ok(response);
     }
 
+    [Consumes("application/json")]
+    [Produces("application/json")]
+    [ProducesResponseType(typeof(GetCustomerByIdResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     [HttpGet("{id}")]
     [Authorize(Roles = Roles.CustomerService)]
-    public async Task<IActionResult> GetById(Guid id)
+    public async Task<IActionResult> GetById([FromRoute] Guid id)
     {
         GetCustomerByIdResult result;
         try {
@@ -90,10 +98,15 @@ public class CustomersController(
         return Ok(response);
     }
 
+    [Consumes("application/json-patch+json")]
+    [Produces("application/json")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]    
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     [HttpPatch("{id}")]
     [Authorize(Roles = $"{Roles.Customer},{Roles.CustomerService}")]
     public async Task<IActionResult> Patch(
-        Guid id,
+        [FromRoute] Guid id,
         [FromBody] JsonPatchDocument<UpdateUserDto> patchDoc
     )
     {
@@ -128,8 +141,12 @@ public class CustomersController(
         return NoContent();
     }
 
+    [Consumes("application/json")]
+    [Produces("application/json")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     [HttpDelete("{id}")]
-    public async Task<IActionResult> DeleteCustomerById(Guid id)
+    public async Task<IActionResult> DeleteCustomerById([FromRoute] Guid id)
     {
         var result = await _deleteCustomerHandler.HandleAsync(new DeleteCustomerCommand(id));
 
