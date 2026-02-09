@@ -16,6 +16,10 @@ public class MeController(
 {
     private readonly DeleteCustomerHandler _deleteCustomerHandler = deleteCustomerHandler;
 
+    [Consumes("application/json")]
+    [Produces("application/json")]
+    [ProducesResponseType(typeof(MeResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [HttpGet]
     public async Task<IActionResult> Get()
     {
@@ -38,6 +42,11 @@ public class MeController(
         return Ok(response);
     }
 
+    [Consumes("application/json")]
+    [Produces("application/json")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]    
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     [HttpDelete]
     public async Task<IActionResult> DeleteById()
     {
