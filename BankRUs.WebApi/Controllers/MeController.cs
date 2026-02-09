@@ -1,4 +1,5 @@
-﻿using BankRUs.Infrastructure.Identity;
+﻿using BankRUs.Application.UseCases.DeleteCustomer;
+using BankRUs.Infrastructure.Identity;
 using BankRUs.WebApi.Dtos.Me;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -9,8 +10,12 @@ namespace BankRUs.WebApi.Controllers;
 [Route("api/[controller]")]
 [Authorize(Roles = Roles.Customer)]
 [ApiController]
-public class MeController : ControllerBase
+public class MeController(
+    DeleteCustomerHandler deleteCustomerHandler
+) : ControllerBase
 {
+    private readonly DeleteCustomerHandler _deleteCustomerHandler = deleteCustomerHandler;
+
     [HttpGet]
     public async Task<IActionResult> Get()
     {
@@ -31,5 +36,18 @@ public class MeController : ControllerBase
         );
 
         return Ok(response);
+    }
+
+    [HttpDelete]
+    public async Task<IActionResult> DeleteById()
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (userId is null) return Unauthorized();
+
+        var result = await _deleteCustomerHandler.HandleAsync(new DeleteCustomerCommand(Guid.Parse(userId)));
+        
+        if (!result.Succeeded) return NotFound();
+
+        return NoContent();
     }
 }
