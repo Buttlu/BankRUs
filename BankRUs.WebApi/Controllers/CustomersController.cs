@@ -1,4 +1,5 @@
 ﻿using BankRUs.Application.Services;
+using BankRUs.Application.UseCases.DeleteCustomer;
 using BankRUs.Application.UseCases.GetCustomers;
 using BankRUs.Application.UseCases.UpdateAccount;
 using BankRUs.Infrastructure.Authentication;
@@ -17,14 +18,17 @@ namespace BankRUs.WebApi.Controllers;
 [ApiController]
 public class CustomersController(
     GetCustomersHandler getCustomersHandler,
-    IOptions<PaginationOptions> pageOptions,
     UpdateAccountHandler updateAccountHandler,
+    DeleteCustomerHandler deleteCustomerHandler,
+    IOptions<PaginationOptions> pageOptions,
     ICustomerService customerService
+
 ) : ControllerBase
 {
     private readonly PaginationOptions _pageOptions = pageOptions.Value;
     private readonly GetCustomersHandler _getCustomersHandler = getCustomersHandler;
     private readonly UpdateAccountHandler _updateAccountHandler = updateAccountHandler;
+    private readonly DeleteCustomerHandler _deleteCustomerHandler = deleteCustomerHandler;
     private readonly ICustomerService _customerService = customerService;
 
     [HttpGet]
@@ -120,6 +124,17 @@ public class CustomersController(
             return ValidationProblem(ModelState);
 
         await _customerService.UpdateCustomerInfo(result.UserId, updateDto);
+
+        return NoContent();
+    }
+
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DeleteCustomerById(Guid id)
+    {
+        var result = await _deleteCustomerHandler.HandleAsync(new DeleteCustomerCommand(id));
+
+        if (!result.Succeeded)
+            return NotFound();
 
         return NoContent();
     }

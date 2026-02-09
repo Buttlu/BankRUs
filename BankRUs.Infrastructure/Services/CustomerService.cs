@@ -15,7 +15,7 @@ public class CustomerService(
 {
     private readonly ICustomerRepository _customerRepository = customerRepository;
     private readonly IBankAccountRepository _bankAccountRepository = bankAccountRepository;
-    private readonly IUnitOfWork _unitOfWork = unitOfWork;
+    private readonly IUnitOfWork _unitOfWork = unitOfWork;    
 
     public async Task<PagedResponse<CustomerDto>> GetAllAsync(GetCustomersQuery query)
     {
@@ -57,5 +57,14 @@ public class CustomerService(
     {
         await _customerRepository.UpdateUserAsync(userId, updateDto);
         await _unitOfWork.SaveAsync();
+    }
+
+    public async Task<bool> DeleteCustomer(Guid customerId)
+    {
+        var succeeded = await _customerRepository.DeleteAsync(customerId);
+        if (succeeded) {
+            await _unitOfWork.SaveAsync();
+        }
+        return succeeded;
     }
 }

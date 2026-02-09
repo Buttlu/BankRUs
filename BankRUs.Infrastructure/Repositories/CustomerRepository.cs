@@ -10,11 +10,12 @@ namespace BankRUs.Infrastructure.Repositories;
 
 public class CustomerRepository(ApplicationDbContext context) : ICustomerRepository
 {
-    private readonly ApplicationDbContext _context = context;
+    private readonly ApplicationDbContext _context = context;    
 
     public async Task<(IReadOnlyList<CustomerDto>, int)> GetAllAsync(GetCustomersQuery query)
     {
         var customerQuery = _context.Users
+            .Where(u => !u.IsDeleted)
             .AsNoTracking();
 
         if (query.Ssn is not null)
@@ -44,7 +45,7 @@ public class CustomerRepository(ApplicationDbContext context) : ICustomerReposit
             .AsNoTracking()
             .FirstOrDefaultAsync(c => c.Id == id);
 
-        if (user is null) 
+        if (user is null || user.IsDeleted) 
             return null;
 
         return new CustomerDto(
@@ -70,5 +71,17 @@ public class CustomerRepository(ApplicationDbContext context) : ICustomerReposit
         user.SocialSecurityNumber = updateDto.SocialSecuritNumber!;
 
         _context.Users.Update(user);
+    }
+
+    public async Task<bool> DeleteAsync(Guid customerId)
+    {
+        string strId = customerId.ToString();
+        var customer = await _context.Users.FirstOrDefaultAsync(u => u.Id == strId);
+
+        if (customer is null || customer.IsDeleted) return false;
+
+        customer.Delete();
+
+        return true;
     }
 }

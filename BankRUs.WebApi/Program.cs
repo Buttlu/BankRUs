@@ -3,6 +3,7 @@ using BankRUs.Application.Identity;
 using BankRUs.Application.Repositories;
 using BankRUs.Application.Services;
 using BankRUs.Application.UseCases.AddBalance;
+using BankRUs.Application.UseCases.DeleteCustomer;
 using BankRUs.Application.UseCases.GetCustomers;
 using BankRUs.Application.UseCases.GetTransactions;
 using BankRUs.Application.UseCases.OpenAccount;
@@ -27,6 +28,7 @@ var builder = WebApplication.CreateBuilder(args);
 // TODO change some returns to 404
 // TODO add checks for not found (e.g. create bank-account)
 // TODO add security to US 5, 6, 7
+// TODO get auth token returns 401 on not found account?
 
 // Add services to the container.
 // Handlers
@@ -38,6 +40,7 @@ builder.Services.AddScoped<WithdrawBalanceHandler>();
 builder.Services.AddScoped<GetTransactionsHandler>();
 builder.Services.AddScoped<GetCustomersHandler>();
 builder.Services.AddScoped<UpdateAccountHandler>();
+builder.Services.AddScoped<DeleteCustomerHandler>();
 
 // Repositories
 builder.Services.AddScoped<IBankAccountRepository, BankAccountRepository>();

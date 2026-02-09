@@ -9,4 +9,5 @@ public interface ICustomerRepository
     Task<(IReadOnlyList<CustomerDto>, int)> GetAllAsync(GetCustomersQuery query);
     Task UpdateUserAsync(Guid userId, UpdateUserDto updateDto);
     Task<CustomerDto?> GetByIdAsync(string id);
+    Task<bool> DeleteAsync(Guid customerId);
 }
