@@ -62,8 +62,28 @@ public class TransactionService(
         );
     }
 
-    public Task<Transaction> WithdrawBalance(WithdrawBalanceCommand command)
+    public async Task<Transaction> WithdrawBalance(WithdrawBalanceCommand command)
     {
-        throw new NotImplementedException();
+        var bankAccount = await _bankAccountRepository.GetById(command.BankAccountId)
+            ?? throw new ArgumentException("Bank Account Not Found");
+        
+        bankAccount.Withdraw(command.Amount);
+        _bankAccountRepository.UpdateBalance(bankAccount);
+
+        var transaction = new Transaction {
+            Id = Guid.NewGuid(),
+            UserId = Guid.Parse(bankAccount.UserId),
+            Reference = command.Reference,
+            CreatedAt = DateTime.UtcNow,
+            Type = "Withdrawal",
+            Currency = "SEK",
+            Amount = command.Amount,
+            BalanceAfter = bankAccount.Balance
+        };
+
+        await _transactionRepository.CreateTransaction(transaction);
+        await _unitOfWork.SaveAsync();
+        
+        return transaction;
     }
 }

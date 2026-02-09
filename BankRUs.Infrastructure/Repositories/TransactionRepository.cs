@@ -32,7 +32,7 @@ public class TransactionRepository(
         if (query.To is not null)
             transactions = transactions.Where(t => t.CreatedAt < query.To);
 
-        if (query.Type?.ToLower() == "deposit" || query.Type?.ToLower() == "withdrawal")
+        if (!string.IsNullOrWhiteSpace(query.Type))
             transactions = transactions.Where(t => t.Type == query.Type);
 
         transactions = query.Desc switch {

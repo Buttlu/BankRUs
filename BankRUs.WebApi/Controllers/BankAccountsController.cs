@@ -66,7 +66,7 @@ public class BankAccountsController(
             return ValidationProblem(ModelState);
         }
 
-        AddBalanceResult balanceResult = default!;
+        AddBalanceResult balanceResult;
         try {
             balanceResult = await _addBalanceHandler.HandleAsync(new AddBalanceCommand(
                 BankAccountId: accoundId,
