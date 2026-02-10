@@ -1,6 +1,5 @@
 ﻿using BankRUs.Application.Repositories;
 using BankRUs.Application.Services;
-using System.Globalization;
 
 namespace BankRUs.Application.UseCases.GetTransactions;
 

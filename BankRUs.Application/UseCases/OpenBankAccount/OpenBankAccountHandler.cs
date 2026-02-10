@@ -1,20 +1,17 @@
-﻿using BankRUs.Application.Repositories;
-using BankRUs.Application.Services;
+﻿using BankRUs.Application.Services;
 using BankRUs.Domain.Entities;
 
 namespace BankRUs.Application.UseCases.OpenBankAccount;
 
 public class OpenBankAccountHandler(
-    IBankAccountRepository repository,
     IAccountNumberGenerator accountNumberGenerator,
-    IUnitOfWork unitOfWork,
-    ICustomerService customerService
+    ICustomerService customerService,
+    IBankAccountService bankAccountService
 )    
 {
     private readonly IAccountNumberGenerator _accountNumberGenerator = accountNumberGenerator;
-    private readonly IUnitOfWork _unitOfWork = unitOfWork;
     private readonly ICustomerService _customerService = customerService;
-    private readonly IBankAccountRepository _bankAccountRepository = repository;
+    private readonly IBankAccountService _bankAccountService = bankAccountService;
 
     public async Task<OpenBankAccountResult> HandleAsync(OpenBankAccountCommand command)
     {
@@ -27,8 +24,7 @@ public class OpenBankAccountHandler(
             userId: customer.CustomerId.ToString()
         );
 
-        _bankAccountRepository.Add(bankAccount);
-        await _unitOfWork.SaveAsync();
+        await _bankAccountService.Add(bankAccount);
 
         return new OpenBankAccountResult(
             Id: bankAccount.Id,
