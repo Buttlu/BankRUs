@@ -145,7 +145,7 @@ public class CustomersController(
     [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [HttpDelete("{id}")]
+    [HttpPost("{id}/delete")]
     public async Task<IActionResult> DeleteCustomerById([FromRoute] Guid id)
     {
         var result = await _deleteCustomerHandler.HandleAsync(new DeleteCustomerCommand(id));

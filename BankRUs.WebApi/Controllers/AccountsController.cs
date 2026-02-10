@@ -18,7 +18,7 @@ public class AccountsController(
     [Produces("application/json")]
     [ProducesResponseType(typeof(CreateAccountResponseDto), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [HttpPost]
+    [HttpPost("create")]
     public async Task<IActionResult> Create([FromBody] CreateAccountRequestDto requestDto)
     {
         OpenAccountCommand command = new(
