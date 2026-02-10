@@ -33,11 +33,17 @@ public class BankAccountsController(
     [HttpPost("create")]
     public async Task<IActionResult> CreateBankAccount([FromBody] CreateBankAccountRequestDto request)
     {
-        OpenBankAccountResult openBankAccountResult = await _bankAccountHandler.HandleAsync(new OpenBankAccountCommand(
-                UserId: request.UserId,
-                AccountName: request.AccountName
-            )
-        );
+        OpenBankAccountResult openBankAccountResult;
+        try {
+            openBankAccountResult = await _bankAccountHandler.HandleAsync(new OpenBankAccountCommand(
+                    UserId: request.UserId,
+                    AccountName: request.AccountName
+                )
+            );
+        } catch (ArgumentException ex) {
+            ModelState.AddModelError("Account", ex.Message);
+            return ValidationProblem(ModelState);
+        }
 
         BankAccountDto response = new(
             Id: openBankAccountResult.Id,
@@ -73,8 +79,8 @@ public class BankAccountsController(
                 Amount: addBalanceDto.Amount,
                 Reference: addBalanceDto.Reference
             ));
-        } catch (ArgumentException ae) { // Account not found
-            ModelState.AddModelError("Account", ae.Message);
+        } catch (ArgumentException ex) { // Account not found
+            ModelState.AddModelError("Account", ex.Message);
             return ValidationProblem(ModelState);
         }
 
@@ -108,17 +114,18 @@ public class BankAccountsController(
             return ValidationProblem(ModelState);
         }
 
-        WithdrawBalanceResult result = default!;
+        WithdrawBalanceResult result;
         try {
             result = await _withdrawBalanceHandler.HandleAsync(new WithdrawBalanceCommand(
                 BankAccountId: accoundId,
                 Amount: balanceDto.Amount,
                 Reference: balanceDto.Reference
             ));
-        } catch (ArgumentException ae) {
-            ModelState.AddModelError("Input Data Error", ae.Message);
-        } catch (ArithmeticException ae) { // Balance cannot be negative
-            ModelState.AddModelError("Insuffient funds", ae.Message);
+        } catch (ArgumentException ex) {
+            ModelState.AddModelError("Account", ex.Message);
+            return ValidationProblem(ModelState);
+        } catch (ArithmeticException ex) { // Balance cannot be negative
+            ModelState.AddModelError("InsuffientFunds", ex.Message);
             return Conflict(ModelState);
         }
 
@@ -163,8 +170,8 @@ public class BankAccountsController(
                 Type: query.Type,
                 Desc: query.Sort
             ));
-        } catch (ArgumentException ae) {
-            ModelState.AddModelError("Account", ae.Message);
+        } catch (ArgumentException ex) {
+            ModelState.AddModelError("Account", ex.Message);
             return ValidationProblem(ModelState);
         }
 

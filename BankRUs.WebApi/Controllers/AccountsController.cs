@@ -35,8 +35,8 @@ public class AccountsController(
         OpenAccountResult result;
         try {
             result = await _openAccountHandler.HandleAsync(command);
-        } catch (Exception e) {
-            ModelState.AddModelError("Duplicate Entry", e.Message);
+        } catch (Exception ex) {
+            ModelState.AddModelError("Duplicate Entry", ex.Message);
             return ValidationProblem(ModelState);
         }
 
