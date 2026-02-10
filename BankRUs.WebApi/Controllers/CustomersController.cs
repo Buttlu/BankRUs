@@ -86,12 +86,11 @@ public class CustomersController(
             LastName: result.LastName,
             Email: result.Email,
             SocialSecurityNumber: result.SocialSecurityNumber,
-            BankAccounts: result.BankAccounts.Select(b => new BankAccountDto(
+            BankAccounts: result.BankAccounts.Select(b => new CustomerBankAccountDto(
                 Id: b.Id,
                 Name: b.Name,
                 AccountNumber: b.AccountNumber,
-                Balance: b.Balance,
-                UserId: null
+                Balance: b.Balance
             )).ToList()
         );
 
