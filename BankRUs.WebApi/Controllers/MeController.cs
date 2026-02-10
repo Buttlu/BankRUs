@@ -45,8 +45,8 @@ public class MeController(
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]    
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [HttpDelete]
-    public async Task<IActionResult> DeleteById()
+    [HttpPost("delete")]
+    public async Task<IActionResult> Delete()
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (userId is null) return Unauthorized();
