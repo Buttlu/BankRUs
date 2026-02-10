@@ -26,11 +26,8 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// TODO change some returns to 404
-// TODO add checks for not found (e.g. create bank-account)
+// TODO properly implement GET /api/me
 // TODO add security to US 5, 6, 7
-// TODO get auth token returns 401 on not found account?
-// TODO fix deposit and withdraw - amount doesn't update
 
 // Add services to the container.
 // Handlers
