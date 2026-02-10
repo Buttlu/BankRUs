@@ -8,5 +8,5 @@ public sealed record GetCustomerByIdResponseDto(
     string LastName,
     string Email,
     string SocialSecurityNumber,
-    IReadOnlyList<BankAccountDto> BankAccounts
+    IReadOnlyList<CustomerBankAccountDto> BankAccounts
 );

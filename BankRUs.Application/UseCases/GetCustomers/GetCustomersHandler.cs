@@ -1,6 +1,4 @@
 ﻿using BankRUs.Application.Services;
-using BankRUs.Domain.Entities;
-using System.Collections.Generic;
 
 namespace BankRUs.Application.UseCases.GetCustomers;
 

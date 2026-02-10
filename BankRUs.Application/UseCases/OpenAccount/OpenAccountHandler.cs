@@ -7,17 +7,15 @@ namespace BankRUs.Application.UseCases.OpenAccount;
 // POST /api/accounts
 public class OpenAccountHandler(
     IIdentityService identityService, 
-    IBankAccountRepository bankAccountRepository,
+    IBankAccountService bankAccountService,
     IEmailSender  emailSender,
-    IAccountNumberGenerator accountNumberGenerator,
-    IUnitOfWork unitOfWork
-    )
+    IAccountNumberGenerator accountNumberGenerator
+)
 {
     private readonly IIdentityService _identityService = identityService;
-    private readonly IBankAccountRepository _bankAccountRepository = bankAccountRepository;
+    private readonly IBankAccountService _bankAccountService = bankAccountService;
     private readonly IEmailSender _emailSender = emailSender;
     private readonly IAccountNumberGenerator _accountNumberGenerator = accountNumberGenerator;
-    private readonly IUnitOfWork _unitOfWork = unitOfWork;
 
     public async Task<OpenAccountResult> HandleAsync(OpenAccountCommand command)
     {
@@ -36,8 +34,7 @@ public class OpenAccountHandler(
             accountNumber: _accountNumberGenerator.Generate(),
             name: "standardkonto",
             userId: result.UserId.ToString());
-        _bankAccountRepository.Add(bankAccount);
-        await _unitOfWork.SaveAsync();
+        await _bankAccountService.UpdateBalance(bankAccount);
 
         // TODO: skick välkomstmail
         //      Delegera till infrastructure

@@ -5,6 +5,7 @@ using BankRUs.Application.Services;
 using BankRUs.Application.UseCases.AddBalance;
 using BankRUs.Application.UseCases.DeleteCustomer;
 using BankRUs.Application.UseCases.GetCustomers;
+using BankRUs.Application.UseCases.GetMyDetails;
 using BankRUs.Application.UseCases.GetTransactions;
 using BankRUs.Application.UseCases.OpenAccount;
 using BankRUs.Application.UseCases.OpenBankAccount;
@@ -40,6 +41,7 @@ builder.Services.AddScoped<GetTransactionsHandler>();
 builder.Services.AddScoped<GetCustomersHandler>();
 builder.Services.AddScoped<UpdateAccountHandler>();
 builder.Services.AddScoped<DeleteCustomerHandler>();
+builder.Services.AddScoped<GetMyDetailsHandler>();
 
 // Repositories
 builder.Services.AddScoped<IBankAccountRepository, BankAccountRepository>();
@@ -53,6 +55,7 @@ builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<ITransactionService, TransactionService>();
 builder.Services.AddScoped<ICustomerService, CustomerService>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+builder.Services.AddScoped<IBankAccountService, BankAccountService>();
 if (builder.Environment.IsDevelopment()) {
     builder.Services.AddScoped<IEmailSender, FakeEmailSender>();
 
