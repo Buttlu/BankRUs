@@ -27,7 +27,6 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// TODO properly implement GET /api/me
 // TODO add security to US 5, 6, 7
 
 // Add services to the container.

@@ -16,6 +16,7 @@ public class IdentityService(UserManager<ApplicationUser> userManager) : IIdenti
             LastName = request.LastName.Trim(),
             SocialSecurityNumber = request.SocialSecurityNumber.Trim(),
             Email = request.Email.Trim(),
+            EmailConfirmed = true,
         };        
 
         IdentityResult result = await _userManager.CreateAsync(user, password: "Aa111!");
