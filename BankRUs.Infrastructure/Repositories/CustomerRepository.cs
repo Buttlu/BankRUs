@@ -3,20 +3,21 @@ using BankRUs.Application.Repositories;
 using BankRUs.Application.UseCases.GetCustomers;
 using BankRUs.Application.UseCases.UpdateAccount;
 using BankRUs.Infrastructure.Identity;
-using BankRUs.Infrastructure.Persistance;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace BankRUs.Infrastructure.Repositories;
 
-public class CustomerRepository(ApplicationDbContext context) : ICustomerRepository
+public class CustomerRepository(
+    UserManager<ApplicationUser> userManager
+) : ICustomerRepository
 {
-    private readonly ApplicationDbContext _context = context;    
+    private readonly UserManager<ApplicationUser> _userManager = userManager;
 
     public async Task<(IReadOnlyList<CustomerDto>, int)> GetAllAsync(GetCustomersQuery query)
     {
-        var customerQuery = _context.Users
-            .Where(u => !u.IsDeleted)
-            .AsNoTracking();
+        var customerQuery = _userManager.Users
+            .Where(u => !u.IsDeleted);
 
         if (query.Ssn is not null)
             customerQuery = customerQuery.Where(c => c.SocialSecurityNumber.Contains(query.Ssn));
@@ -41,9 +42,7 @@ public class CustomerRepository(ApplicationDbContext context) : ICustomerReposit
 
     public async Task<CustomerDto?> GetByIdAsync(string id)
     {
-        var user = await _context.Users
-            .AsNoTracking()
-            .FirstOrDefaultAsync(c => c.Id == id);
+        var user = await _userManager.FindByIdAsync(id);
 
         if (user is null || user.IsDeleted) 
             return null;
@@ -60,27 +59,26 @@ public class CustomerRepository(ApplicationDbContext context) : ICustomerReposit
 
     public async Task UpdateUserAsync(Guid userId, UpdateUserDto updateDto)
     {
-        string userIdStr = userId.ToString();
-        ApplicationUser user = await _context.Users
-            .AsNoTracking()
-            .FirstAsync(u => u.Id == userIdStr);
-        
+        var user = await _userManager.FindByIdAsync(userId.ToString());
+
+        if (user is null || !user.IsDeleted)
+            throw new ArgumentException("User could not be found");
+
         user.FirstName = updateDto.FirstName!;
         user.LastName = updateDto.LastName!;
         user.Email = updateDto.Email!;
         user.SocialSecurityNumber = updateDto.SocialSecuritNumber!;
 
-        _context.Users.Update(user);
+        await _userManager.UpdateAsync(user);
     }
 
-    public async Task<bool> DeleteAsync(Guid customerId)
+    public async Task<bool> DeleteAsync(Guid userId)
     {
-        string strId = customerId.ToString();
-        var customer = await _context.Users.FirstOrDefaultAsync(u => u.Id == strId);
+        var user = await _userManager.FindByIdAsync(userId.ToString());
 
-        if (customer is null || customer.IsDeleted) return false;
+        if (user is null || user.IsDeleted) return false;
 
-        customer.Delete();
+        user.Delete();
 
         return true;
     }

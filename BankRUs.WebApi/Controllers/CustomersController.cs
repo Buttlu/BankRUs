@@ -134,9 +134,9 @@ public class CustomersController(
         TryValidateModel(ModelState);
         if (!ModelState.IsValid)
             return ValidationProblem(ModelState);
-
+        
+        // Already confirmed user exists
         await _customerService.UpdateCustomerInfo(result.UserId, updateDto);
-
         return NoContent();
     }
 
