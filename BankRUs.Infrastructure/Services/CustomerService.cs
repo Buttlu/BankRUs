@@ -54,10 +54,7 @@ public class CustomerService(
     }
 
     public async Task UpdateCustomerInfo(Guid userId, UpdateUserDto updateDto)
-    {
-        await _customerRepository.UpdateUserAsync(userId, updateDto);
-        await _unitOfWork.SaveAsync();
-    }
+        => await _customerRepository.UpdateUserAsync(userId, updateDto);    
 
     public async Task<bool> DeleteCustomer(Guid customerId)
     {
