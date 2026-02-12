@@ -1,4 +1,4 @@
-﻿namespace BankRUs.Application.Services;
+﻿namespace BankRUs.Application.Authentication;
 
 public interface ITokenService
 {

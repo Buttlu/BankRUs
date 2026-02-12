@@ -1,23 +1,49 @@
-﻿using BankRUs.Application.UseCases.OpenBankAccount;
+﻿using BankRUs.Application.UseCases.AddBalance;
+using BankRUs.Application.UseCases.GetTransactions;
+using BankRUs.Application.UseCases.OpenBankAccount;
+using BankRUs.Application.UseCases.WithdrawBalance;
+using BankRUs.Infrastructure.Authentication;
 using BankRUs.WebApi.Dtos.BankAccounts;
+using BankRUs.WebApi.Dtos.Transactions;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 
 namespace BankRUs.WebApi.Controllers;
 
 [Route("api/bank-accounts")]
 [ApiController]
-public class BankAccountsController(OpenBankAccountHandler handler) : ControllerBase
+public class BankAccountsController(
+    OpenBankAccountHandler bankAccountHandler, 
+    AddBalanceHandler addBalanceHandler,
+    WithdrawBalanceHandler withdrawBalanceHandler,
+    GetTransactionsHandler getTransactionsHandler,
+    IOptions<PaginationOptions> pageOptions
+) : ControllerBase
 {
-    private readonly OpenBankAccountHandler _handler = handler;
+    private readonly OpenBankAccountHandler _bankAccountHandler = bankAccountHandler;
+    private readonly AddBalanceHandler _addBalanceHandler = addBalanceHandler;
+    private readonly WithdrawBalanceHandler _withdrawBalanceHandler = withdrawBalanceHandler;
+    private readonly GetTransactionsHandler _getTransactionsHandler = getTransactionsHandler;
+    private readonly PaginationOptions _pageOptions = pageOptions.Value;
 
-    [HttpPost]
-    public async Task<IActionResult> CreateBankAccount(CreateBankAccountRequestDto request)
+    [Consumes("application/json")]
+    [Produces("application/json")]
+    [ProducesResponseType(typeof(BankAccountDto), StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [HttpPost("create")]
+    public async Task<IActionResult> CreateBankAccount([FromBody] CreateBankAccountRequestDto request)
     {
-        OpenBankAccountResult openBankAccountResult = await _handler.HandleAsync(new OpenBankAccountCommand(
-                UserId: request.UserId,
-                AccountName: request.AccountName
-            )
-        );
+        OpenBankAccountResult openBankAccountResult;
+        try {
+            openBankAccountResult = await _bankAccountHandler.HandleAsync(new OpenBankAccountCommand(
+                    UserId: request.UserId,
+                    AccountName: request.AccountName
+                )
+            );
+        } catch (ArgumentException ex) {
+            ModelState.AddModelError("Account", ex.Message);
+            return ValidationProblem(ModelState);
+        }
 
         BankAccountDto response = new(
             Id: openBankAccountResult.Id,
@@ -28,5 +54,135 @@ public class BankAccountsController(OpenBankAccountHandler handler) : Controller
             );
 
         return Created("", response);
-    }    
+    }
+
+    [Consumes("application/json")]
+    [Produces("application/json")]
+    [ProducesResponseType(typeof(AddBalanceResultDto), StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [HttpPost("{accoundId}/deposits")]
+    public async Task<IActionResult> AddBalance([FromRoute] Guid accoundId, [FromBody] AddBalanceDto addBalanceDto)
+    {
+        if (addBalanceDto.Amount <= 0) {
+            ModelState.AddModelError("Amount", "Amount must be above 0");
+            return ValidationProblem(ModelState);
+        }
+        
+        if (!ModelState.IsValid) {
+            return ValidationProblem(ModelState);
+        }
+
+        AddBalanceResult balanceResult;
+        try {
+            balanceResult = await _addBalanceHandler.HandleAsync(new AddBalanceCommand(
+                BankAccountId: accoundId,
+                Amount: addBalanceDto.Amount,
+                Reference: addBalanceDto.Reference
+            ));
+        } catch (ArgumentException ex) { // Account not found
+            ModelState.AddModelError("Account", ex.Message);
+            return ValidationProblem(ModelState);
+        }
+
+        var resultDto = new AddBalanceResultDto(
+            TransactionId: balanceResult.TransactionId,
+            UserId: balanceResult.UserId,
+            Type: balanceResult.Type,
+            Amount: balanceResult.Amount,
+            Currency: balanceResult.Currency,
+            Reference: balanceResult.Reference,
+            CreatedAt: balanceResult.CreatedAt,
+            BalanceAfter: balanceResult.BalanceAfter
+        );
+
+        return Created("", resultDto);
+    }
+
+    [Consumes("application/json")]
+    [Produces("application/json")]
+    [ProducesResponseType(typeof(WithdrawBalanceResultDto), StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [HttpPost("{accoundId}/withdrawals")]
+    public async Task<IActionResult> WithdrawBalance([FromRoute] Guid accoundId, [FromBody] WithdrawBalanceDto balanceDto)
+    {
+        if (balanceDto.Amount <= 0) {
+            ModelState.AddModelError("Amount", "Amount must be above 0");
+            return ValidationProblem(ModelState);
+        }
+        
+        if (!ModelState.IsValid) {
+            return ValidationProblem(ModelState);
+        }
+
+        WithdrawBalanceResult result;
+        try {
+            result = await _withdrawBalanceHandler.HandleAsync(new WithdrawBalanceCommand(
+                BankAccountId: accoundId,
+                Amount: balanceDto.Amount,
+                Reference: balanceDto.Reference
+            ));
+        } catch (ArgumentException ex) {
+            ModelState.AddModelError("Account", ex.Message);
+            return ValidationProblem(ModelState);
+        } catch (ArithmeticException ex) { // Balance cannot be negative
+            ModelState.AddModelError("InsuffientFunds", ex.Message);
+            return Conflict(ModelState);
+        }
+
+        var resultDto = new WithdrawBalanceResultDto(
+            TransactionId: result.TransactionId,
+            UserId: result.UserId,
+            Type: result.Type,
+            Amount: result.Amount,
+            Currency: result.Currency,
+            Reference: result.Reference,
+            CreatedAt: result.CreatedAt,
+            BalanceAfter: result.BalanceAfter
+        );
+
+        return Created("", resultDto);
+    }
+    [Consumes("application/json")]
+    [Produces("application/json")]
+    [ProducesResponseType(typeof(ListTransactionResultDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [HttpGet("{accountId}/transactions")]
+    public async Task<IActionResult> GetTransactionsFromAccount([FromRoute] Guid accountId, [FromQuery] TransactionQuery query)
+    {
+        if (!ModelState.IsValid)
+            return ValidationProblem(ModelState);
+
+        int page = query.Page;
+        int pageSize = query.PageSize;
+        if (page < 1) page = 1;
+        if (pageSize < 1) pageSize = 1;
+        else if (pageSize > _pageOptions.MaxPageSize) 
+            pageSize = _pageOptions.MaxPageSize;
+
+        GetTransactionsResult result;
+        try {
+            result = await _getTransactionsHandler.HandleAsync(new GetTransactionsQuery(
+                BankAccountId: accountId,
+                Page: page,
+                PageSize: pageSize,
+                From: query.From,
+                To: query.To,
+                Type: query.Type,
+                Desc: query.Sort
+            ));
+        } catch (ArgumentException ex) {
+            ModelState.AddModelError("Account", ex.Message);
+            return ValidationProblem(ModelState);
+        }
+
+        var response = new ListTransactionResultDto(
+            AccountId: result.AccountId,
+            Currency: result.Currency,
+            Balance: result.Balance,
+            Paging: result.Paging,
+            Items: result.Transactions
+        );
+
+        return Ok(response);
+    }
 }

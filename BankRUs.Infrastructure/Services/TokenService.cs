@@ -1,4 +1,4 @@
-﻿using BankRUs.Application.Services;
+﻿using BankRUs.Application.Authentication;
 using BankRUs.Infrastructure.Authentication;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;

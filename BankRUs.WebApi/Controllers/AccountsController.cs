@@ -1,17 +1,25 @@
 ﻿using BankRUs.Application.UseCases.OpenAccount;
+using BankRUs.Application.UseCases.UpdateAccount;
 using BankRUs.WebApi.Dtos.Accounts;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BankRUs.WebApi.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class AccountsController(OpenAccountHandler handler) : ControllerBase
+public class AccountsController(
+    OpenAccountHandler openAccountHandler
+) : ControllerBase
 {
-    private readonly OpenAccountHandler _openAccountHandler = handler;
+    private readonly OpenAccountHandler _openAccountHandler = openAccountHandler;
 
-    [HttpPost]
-    public async Task<IActionResult> Create(CreateAccountRequestDto requestDto)
+    [Consumes("application/json")]
+    [Produces("application/json")]
+    [ProducesResponseType(typeof(CreateAccountResponseDto), StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [HttpPost("create")]
+    public async Task<IActionResult> Create([FromBody] CreateAccountRequestDto requestDto)
     {
         OpenAccountCommand command = new(
             FirstName: requestDto.FirstName,
@@ -27,13 +35,13 @@ public class AccountsController(OpenAccountHandler handler) : ControllerBase
         OpenAccountResult result;
         try {
             result = await _openAccountHandler.HandleAsync(command);
-        } catch (Exception e) {
-            ModelState.AddModelError("Duplicate Entry", e.Message);
+        } catch (Exception ex) {
+            ModelState.AddModelError("Duplicate Entry", ex.Message);
             return ValidationProblem(ModelState);
         }
 
         CreateAccountResponseDto response = new(result.UserId);
 
         return Created("", new { response.UserId });
-    }
+    }    
 }

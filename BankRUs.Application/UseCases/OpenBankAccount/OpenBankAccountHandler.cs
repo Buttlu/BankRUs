@@ -1,32 +1,36 @@
-﻿using BankRUs.Application.Repositories;
-using BankRUs.Application.Services;
+﻿using BankRUs.Application.Services;
 using BankRUs.Domain.Entities;
 
 namespace BankRUs.Application.UseCases.OpenBankAccount;
 
 public class OpenBankAccountHandler(
-    IBankAccountRepository repository,
-    IAccountNumberGenerator accountNumberGenerator
+    IAccountNumberGenerator accountNumberGenerator,
+    ICustomerService customerService,
+    IBankAccountService bankAccountService
 )    
 {
     private readonly IAccountNumberGenerator _accountNumberGenerator = accountNumberGenerator;
-    private readonly IBankAccountRepository _bankAccountRepository = repository;
+    private readonly ICustomerService _customerService = customerService;
+    private readonly IBankAccountService _bankAccountService = bankAccountService;
 
     public async Task<OpenBankAccountResult> HandleAsync(OpenBankAccountCommand command)
     {
-        Random rnd = new();
-        
+        var customer = await _customerService.GetByIdAsync(command.UserId)
+            ?? throw new ArgumentException("Cannot find customer");
+
         var bankAccount = new BankAccount(
             accountNumber: _accountNumberGenerator.Generate(),
             name: command.AccountName ?? "standardkonto",
-            userId: command.UserId.ToString());
-        await _bankAccountRepository.AddAsync(bankAccount);
-        
+            userId: customer.CustomerId.ToString()
+        );
+
+        await _bankAccountService.Add(bankAccount);
+
         return new OpenBankAccountResult(
             Id: bankAccount.Id,
             AccountNumber: bankAccount.AccountNumber,
             AccountName: bankAccount.Name,
-            UserId: Guid.Parse(bankAccount.UserId)
+            UserId: customer.CustomerId
         );
     }
 }

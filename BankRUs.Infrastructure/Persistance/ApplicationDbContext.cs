@@ -8,6 +8,7 @@ namespace BankRUs.Infrastructure.Persistance;
 public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : IdentityDbContext<ApplicationUser>(options)
 {
     public DbSet<BankAccount> BankAccounts => Set<BankAccount>();
+    public DbSet<Transaction> Transactions => Set<Transaction>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

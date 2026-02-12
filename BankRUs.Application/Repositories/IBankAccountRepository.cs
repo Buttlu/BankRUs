@@ -4,5 +4,9 @@ namespace BankRUs.Application.Repositories;
 
 public interface IBankAccountRepository
 {
-    Task AddAsync(BankAccount bankAccount);
+    void Add(BankAccount bankAccount);
+    void UpdateBalance(BankAccount bankAccount);
+    Task<BankAccount?> GetById(Guid bankAccountId);
+    Task<IReadOnlyList<BankAccount>> GetByUserId(Guid userId);
+    
 }

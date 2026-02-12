@@ -1,9 +1,16 @@
-using BankRUs.Application.Authentication.AuthenticateUser;
+using BankRUs.Application.Authentication;
 using BankRUs.Application.Identity;
 using BankRUs.Application.Repositories;
 using BankRUs.Application.Services;
+using BankRUs.Application.UseCases.AddBalance;
+using BankRUs.Application.UseCases.DeleteCustomer;
+using BankRUs.Application.UseCases.GetCustomers;
+using BankRUs.Application.UseCases.GetMyDetails;
+using BankRUs.Application.UseCases.GetTransactions;
 using BankRUs.Application.UseCases.OpenAccount;
 using BankRUs.Application.UseCases.OpenBankAccount;
+using BankRUs.Application.UseCases.UpdateAccount;
+using BankRUs.Application.UseCases.WithdrawBalance;
 using BankRUs.Infrastructure.Authentication;
 using BankRUs.Infrastructure.Identity;
 using BankRUs.Infrastructure.Persistance;
@@ -13,26 +20,66 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Scalar.AspNetCore;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// TODO add security to US 5, 6, 7
+
 // Add services to the container.
+// Handlers
 builder.Services.AddScoped<OpenAccountHandler>();
 builder.Services.AddScoped<AuthenticateUserHandler>();
-builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
-builder.Services.AddScoped<IAccountNumberGenerator, AccountNumberGenerator>();
-builder.Services.AddScoped<IIdentityService, IdentityService>();
-builder.Services.AddScoped<IBankAccountRepository, BankAccountRepository>();
-builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<OpenBankAccountHandler>();
+builder.Services.AddScoped<AddBalanceHandler>();
+builder.Services.AddScoped<WithdrawBalanceHandler>();
+builder.Services.AddScoped<GetTransactionsHandler>();
+builder.Services.AddScoped<GetCustomersHandler>();
+builder.Services.AddScoped<UpdateAccountHandler>();
+builder.Services.AddScoped<DeleteCustomerHandler>();
+builder.Services.AddScoped<GetMyDetailsHandler>();
+
+// Repositories
+builder.Services.AddScoped<IBankAccountRepository, BankAccountRepository>();
+builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
+builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
+
+// Services
+builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
+builder.Services.AddScoped<IIdentityService, IdentityService>();
+builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddScoped<ITransactionService, TransactionService>();
+builder.Services.AddScoped<ICustomerService, CustomerService>();
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+builder.Services.AddScoped<IBankAccountService, BankAccountService>();
 if (builder.Environment.IsDevelopment()) {
     builder.Services.AddScoped<IEmailSender, FakeEmailSender>();
+
+    builder.Services.AddOpenApi(options =>
+    {
+        options.AddDocumentTransformer((document, context, cancellationToken) =>
+        {
+            document.Info.Title = "Bank-R-Us Api";
+            document.Info.Description = "Public Bank-R-Us Api";
+            document.Info.Version = "v1";
+            return Task.CompletedTask;
+        });
+    });
+    builder.Services.AddEndpointsApiExplorer();
 } else {
     builder.Services.AddScoped<IEmailSender, EmailSender>();
 }
+
+// Settings from appsettings.json
+builder.Services.Configure<PaginationOptions>(builder.Configuration.GetSection(PaginationOptions.SectionName));
+builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection(JwtOptions.SectionName));
+
+// Misc
+builder.Services.AddScoped<IAccountNumberGenerator, AccountNumberGenerator>();
+
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("Default"));
@@ -42,9 +89,11 @@ builder.Services
     .AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
-builder.Services.AddControllers();
 
-builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection(JwtOptions.SectionName));
+builder.Services.
+    AddControllers()
+    .AddNewtonsoftJson();
+
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -87,6 +136,9 @@ if (app.Environment.IsDevelopment()) {
     dbContext.Database.Migrate(); 
 
     await new IdentitySeeder().SeedAsync(scope.ServiceProvider);
+
+    app.MapOpenApi();
+    app.MapScalarApiReference();
 }
 
 app.UseHttpsRedirection();

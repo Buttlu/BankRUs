@@ -1,6 +1,6 @@
 ﻿using BankRUs.Application.Authentication.AuthenticateUser;
 
-namespace BankRUs.Application.Services;
+namespace BankRUs.Application.Authentication;
 
 public interface IAuthenticationService
 {
