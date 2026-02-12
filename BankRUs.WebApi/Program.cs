@@ -21,6 +21,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
+using Serilog;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -129,6 +130,7 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddAuthorization();
 
 WebApplication app = builder.Build();
+var loggerConfiguration = new LoggerConfiguration();
 
 if (app.Environment.IsDevelopment()) {
     using var scope = app.Services.CreateScope();
@@ -139,7 +141,13 @@ if (app.Environment.IsDevelopment()) {
 
     app.MapOpenApi();
     app.MapScalarApiReference();
+
+    loggerConfiguration.MinimumLevel.Verbose();
+} else {
+    loggerConfiguration.MinimumLevel.Information();
 }
+
+loggerConfiguration.WriteTo.File("logs/log-.txt", rollingInterval: RollingInterval.Day);
 
 app.UseHttpsRedirection();
 
@@ -151,6 +159,8 @@ app.MapControllers();
 
 app.MapGet("/", () => Results.Ok("The API is running"));
 
-//app.MapCustomersEndpoints();
+Log.Logger = loggerConfiguration.CreateLogger();
 
 app.Run();
+
+await Log.CloseAndFlushAsync();

@@ -7,6 +7,7 @@ using BankRUs.WebApi.Dtos.BankAccounts;
 using BankRUs.WebApi.Dtos.Transactions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using Serilog;
 
 namespace BankRUs.WebApi.Controllers;
 
@@ -32,7 +33,7 @@ public class BankAccountsController(
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [HttpPost("create")]
     public async Task<IActionResult> CreateBankAccount([FromBody] CreateBankAccountRequestDto request)
-    {
+    {        
         OpenBankAccountResult openBankAccountResult;
         try {
             openBankAccountResult = await _bankAccountHandler.HandleAsync(new OpenBankAccountCommand(
@@ -63,6 +64,8 @@ public class BankAccountsController(
     [HttpPost("{accoundId}/deposits")]
     public async Task<IActionResult> AddBalance([FromRoute] Guid accoundId, [FromBody] AddBalanceDto addBalanceDto)
     {
+        Log.Information("Adding {AMOUNT} to {ACCOUNTID}", addBalanceDto.Amount, accoundId);
+
         if (addBalanceDto.Amount <= 0) {
             ModelState.AddModelError("Amount", "Amount must be above 0");
             return ValidationProblem(ModelState);
