@@ -17,6 +17,8 @@ using BankRUs.Infrastructure.Persistance;
 using BankRUs.Infrastructure.Repositories;
 using BankRUs.Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -69,7 +71,7 @@ if (builder.Environment.IsDevelopment()) {
             return Task.CompletedTask;
         });
     });
-    builder.Services.AddEndpointsApiExplorer();
+    builder.Services.AddEndpointsApiExplorer();    
 } else {
     builder.Services.AddScoped<IEmailSender, EmailSender>();
 }
@@ -129,6 +131,15 @@ builder.Services.AddAuthentication(options =>
 });
 builder.Services.AddAuthorization();
 
+builder.Host.UseSerilog((hostContext, services, configuration) =>
+{
+    const string outputTemplate = "[{Timestamp:yyyy-MM-dd HH:mm:ss} {Level:u3}] {Message:lj} {NewLine}{Exception}";
+    configuration
+        .ReadFrom.Configuration(builder.Configuration)
+        .Enrich.FromLogContext()
+        .WriteTo.File("logs/log-.txt", outputTemplate: outputTemplate, rollingInterval: RollingInterval.Day);
+});
+
 WebApplication app = builder.Build();
 var loggerConfiguration = new LoggerConfiguration();
 
@@ -141,13 +152,7 @@ if (app.Environment.IsDevelopment()) {
 
     app.MapOpenApi();
     app.MapScalarApiReference();
-
-    loggerConfiguration.MinimumLevel.Verbose();
-} else {
-    loggerConfiguration.MinimumLevel.Information();
 }
-
-loggerConfiguration.WriteTo.File("logs/log-.txt", rollingInterval: RollingInterval.Day);
 
 app.UseHttpsRedirection();
 
@@ -159,8 +164,4 @@ app.MapControllers();
 
 app.MapGet("/", () => Results.Ok("The API is running"));
 
-Log.Logger = loggerConfiguration.CreateLogger();
-
 app.Run();
-
-await Log.CloseAndFlushAsync();
