@@ -10,13 +10,11 @@ namespace BankRUs.Infrastructure.Services;
 
 public class CustomerService(
     ICustomerRepository customerRepository,
-    IBankAccountRepository bankAccountRepository,
     IUnitOfWork unitOfWork,
     ILogger<CustomerService> logger
 ) : ICustomerService
 {
     private readonly ICustomerRepository _customerRepository = customerRepository;
-    private readonly IBankAccountRepository _bankAccountRepository = bankAccountRepository;
     private readonly IUnitOfWork _unitOfWork = unitOfWork;
     private readonly ILogger<CustomerService> _logger = logger;
 
