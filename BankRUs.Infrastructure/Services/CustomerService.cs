@@ -46,18 +46,9 @@ public class CustomerService(
             _logger.LogWarning("User with Id: {UserId} not found", id);
             return null;
         }
+        _logger.LogInformation("Found user: {UserId}", user.CustomerId);
 
-        var bankAccounts = await _bankAccountRepository.GetByUserId(id);
-        _logger.LogInformation("Found {BankAccountCount} bank accounts belonging to {UserId}", bankAccounts.Count, id);
-
-        return new CustomerDto(
-            CustomerId: user.CustomerId,
-                FirstName: user.FirstName,
-                LastName: user.LastName,
-                Email: user.Email!,
-                SocialSecurityNumber: user.SocialSecurityNumber,
-                BankAccounts: bankAccounts
-        );
+        return user;
     }
 
     public async Task UpdateCustomerInfo(Guid userId, UpdateUserDto updateDto)
