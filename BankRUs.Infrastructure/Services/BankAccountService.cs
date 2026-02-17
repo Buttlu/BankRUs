@@ -44,6 +44,6 @@ public class BankAccountService(
     {
         _bankAccountRepository.UpdateBalance(bankAccount);
         await _unitOfWork.SaveAsync();
-        _logger.LogInformation("Updated Bank Accotunt: {BankAccountId}", bankAccount.Id);
+        _logger.LogInformation("Updated Bank Account: {BankAccountId}", bankAccount.Id);
     }
 }

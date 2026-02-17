@@ -1,5 +1,6 @@
 ﻿using BankRUs.Application.Authentication;
 using BankRUs.Infrastructure.Authentication;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -8,9 +9,13 @@ using System.Text;
 
 namespace BankRUs.Infrastructure.Services;
 
-public class TokenService(IOptions<JwtOptions> options) : ITokenService
+public class TokenService(
+    IOptions<JwtOptions> options,
+    ILogger<TokenService> logger
+) : ITokenService
 {
     private readonly JwtOptions _jwt = options.Value;
+    private readonly ILogger<TokenService> _logger = logger;
 
     public Token CreateToken(string userId, string email, IEnumerable<string>? roles = null)
     {
@@ -52,6 +57,8 @@ public class TokenService(IOptions<JwtOptions> options) : ITokenService
             signingCredentials: creds);
 
         var tokenString = new JwtSecurityTokenHandler().WriteToken(jwt);
+
+        _logger.LogInformation("Created a JWT");
 
         return new Token(
             AccessToken: tokenString,
