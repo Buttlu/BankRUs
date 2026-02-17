@@ -1,6 +1,4 @@
-﻿using BankRUs.Application.Repositories;
-using BankRUs.Application.Services;
-using BankRUs.Domain.Entities;
+﻿using BankRUs.Application.Services;
 
 namespace BankRUs.Application.UseCases.AddBalance;
 

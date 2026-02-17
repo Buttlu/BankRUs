@@ -32,7 +32,7 @@ public class BankAccountsController(
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [HttpPost("create")]
     public async Task<IActionResult> CreateBankAccount([FromBody] CreateBankAccountRequestDto request)
-    {
+    {        
         OpenBankAccountResult openBankAccountResult;
         try {
             openBankAccountResult = await _bankAccountHandler.HandleAsync(new OpenBankAccountCommand(
@@ -106,7 +106,6 @@ public class BankAccountsController(
     public async Task<IActionResult> WithdrawBalance([FromRoute] Guid accoundId, [FromBody] WithdrawBalanceDto balanceDto)
     {
         if (balanceDto.Amount <= 0) {
-            ModelState.AddModelError("Amount", "Amount must be above 0");
             return ValidationProblem(ModelState);
         }
         
