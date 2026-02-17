@@ -7,7 +7,6 @@ using BankRUs.WebApi.Dtos.BankAccounts;
 using BankRUs.WebApi.Dtos.Transactions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using Serilog;
 
 namespace BankRUs.WebApi.Controllers;
 
@@ -64,8 +63,6 @@ public class BankAccountsController(
     [HttpPost("{accoundId}/deposits")]
     public async Task<IActionResult> AddBalance([FromRoute] Guid accoundId, [FromBody] AddBalanceDto addBalanceDto)
     {
-        Log.Information("Adding {AMOUNT} to {ACCOUNTID}", addBalanceDto.Amount, accoundId);
-
         if (addBalanceDto.Amount <= 0) {
             ModelState.AddModelError("Amount", "Amount must be above 0");
             return ValidationProblem(ModelState);
@@ -109,7 +106,6 @@ public class BankAccountsController(
     public async Task<IActionResult> WithdrawBalance([FromRoute] Guid accoundId, [FromBody] WithdrawBalanceDto balanceDto)
     {
         if (balanceDto.Amount <= 0) {
-            ModelState.AddModelError("Amount", "Amount must be above 0");
             return ValidationProblem(ModelState);
         }
         
