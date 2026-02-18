@@ -1,5 +1,4 @@
 ﻿using BankRUs.Application.Services;
-using Microsoft.AspNetCore.Identity;
 
 namespace BankRUs.Application.UseCases.UpdateAccount;
 

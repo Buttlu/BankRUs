@@ -1,5 +1,4 @@
 ﻿using BankRUs.Application.Identity;
-using BankRUs.Application.Repositories;
 using BankRUs.Application.Services;
 using BankRUs.Domain.Entities;
 
@@ -39,7 +38,7 @@ public class OpenAccountHandler(
         // TODO: skick välkomstmail
         //      Delegera till infrastructure
         await _emailSender.SendEmailAsync(
-            from: "no-rply@bankrus.com",
+            from: "no-reply@bankrus.com",
             to: command.Email,
             subject: "Account created",
             body: "Your account has been created"
