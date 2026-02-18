@@ -1,7 +1,6 @@
-﻿using BankRUs.Application.Identity;
+﻿using BankRUs.Application.Dtos.Customer;
+using BankRUs.Application.Identity;
 using BankRUs.Application.Repositories;
-using BankRUs.Application.UseCases.GetCustomers;
-using BankRUs.Application.UseCases.UpdateAccount;
 using BankRUs.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -14,19 +13,19 @@ public class CustomerRepository(
 {
     private readonly UserManager<ApplicationUser> _userManager = userManager;
 
-    public async Task<(IReadOnlyList<CustomerDto>, int)> GetAllAsync(GetCustomersQuery query)
+    public async Task<(IReadOnlyList<CustomerDto>, int)> GetAllAsync(GetCustomersFiltersDto filters)
     {
         var customerQuery = _userManager.Users
             .Where(u => !u.IsDeleted);
 
-        if (query.Ssn is not null)
-            customerQuery = customerQuery.Where(c => c.SocialSecurityNumber.Contains(query.Ssn));
-        if (query.Email is not null)
-            customerQuery = customerQuery.Where(c => c.Email!.Contains(query.Email));
+        if (filters.Ssn is not null)
+            customerQuery = customerQuery.Where(c => c.SocialSecurityNumber.Contains(filters.Ssn));
+        if (filters.Email is not null)
+            customerQuery = customerQuery.Where(c => c.Email!.Contains(filters.Email));
 
         var customers = await customerQuery
-            .Skip((query.Page - 1) * query.PageSize)
-            .Take(query.PageSize)
+            .Skip((filters.Page - 1) * filters.PageSize)
+            .Take(filters.PageSize)
             .Select(a => new CustomerDto(
                 CustomerId: Guid.Parse(a.Id),
                 FirstName: a.FirstName,

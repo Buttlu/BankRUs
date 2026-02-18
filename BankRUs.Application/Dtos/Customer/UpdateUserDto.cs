@@ -1,4 +1,4 @@
-﻿namespace BankRUs.Application.UseCases.UpdateAccount;
+﻿namespace BankRUs.Application.Dtos.Customer;
 
 public record UpdateUserDto(
     string? FirstName,

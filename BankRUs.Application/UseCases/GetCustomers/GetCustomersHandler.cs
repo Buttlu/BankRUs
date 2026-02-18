@@ -16,7 +16,12 @@ public class GetCustomersHandler(
 
     public async Task<GetCustomersResult> GetAllAsync(GetCustomersQuery query)
     {
-        var pagedCustomers = await _customerService.GetAllAsync(query);
+        var pagedCustomers = await _customerService.GetAllAsync(new GetCustomersFiltersDto(
+            Page: query.Page,
+            PageSize: query.PageSize,
+            Ssn: query.Ssn,
+            Email: query.Email
+        ));
 
         return new GetCustomersResult(
             Customers: pagedCustomers.Data,

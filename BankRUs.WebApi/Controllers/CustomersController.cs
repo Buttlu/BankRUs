@@ -1,4 +1,5 @@
-﻿using BankRUs.Application.Services;
+﻿using BankRUs.Application.Dtos.Customer;
+using BankRUs.Application.Services;
 using BankRUs.Application.UseCases.DeleteCustomer;
 using BankRUs.Application.UseCases.GetCustomers;
 using BankRUs.Application.UseCases.UpdateAccount;

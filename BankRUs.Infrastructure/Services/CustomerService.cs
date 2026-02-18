@@ -1,9 +1,8 @@
-﻿using BankRUs.Application.Identity;
+﻿using BankRUs.Application.Dtos.Customer;
+using BankRUs.Application.Identity;
 using BankRUs.Application.Pagination;
 using BankRUs.Application.Repositories;
 using BankRUs.Application.Services;
-using BankRUs.Application.UseCases.GetCustomers;
-using BankRUs.Application.UseCases.UpdateAccount;
 using Microsoft.Extensions.Logging;
 
 namespace BankRUs.Infrastructure.Services;
@@ -18,18 +17,18 @@ public class CustomerService(
     private readonly IUnitOfWork _unitOfWork = unitOfWork;
     private readonly ILogger<CustomerService> _logger = logger;
 
-    public async Task<PagedResponse<CustomerDto>> GetAllAsync(GetCustomersQuery query)
+    public async Task<PagedResponse<CustomerDto>> GetAllAsync(GetCustomersFiltersDto filters)
     {
-        var (customers, customerCount) = await _customerRepository.GetAllAsync(query);
+        var (customers, customerCount) = await _customerRepository.GetAllAsync(filters);
         _logger.LogInformation("Found {CustomerCount} customers", customerCount);
 
-        int totalPages = (int)Math.Ceiling((double)customerCount / query.PageSize);
+        int totalPages = (int)Math.Ceiling((double)customerCount / filters.PageSize);
 
         return new PagedResponse<CustomerDto>(
             Data: customers,
             MetaData: new PageMetaData(
-                Page: query.Page,
-                PageSize: query.PageSize,
+                Page: filters.Page,
+                PageSize: filters.PageSize,
                 TotalCount: customerCount,
                 TotalPages: totalPages
             )
