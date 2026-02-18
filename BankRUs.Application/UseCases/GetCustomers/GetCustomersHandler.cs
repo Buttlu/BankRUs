@@ -1,4 +1,4 @@
-﻿using BankRUs.Application.Repositories;
+﻿using BankRUs.Application.Dtos.Customer;
 using BankRUs.Application.Services;
 using Microsoft.Extensions.Logging;
 
