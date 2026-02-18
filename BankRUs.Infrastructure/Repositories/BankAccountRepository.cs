@@ -12,9 +12,7 @@ public class BankAccountRepository(
     private readonly ApplicationDbContext _context = context;
 
     public void Add(BankAccount bankAccount)
-    {
-        _context.BankAccounts.Add(bankAccount);
-    }    
+        => _context.BankAccounts.Add(bankAccount);
 
     public async Task<BankAccount?> GetById(Guid bankAccountId)
         => await _context.BankAccounts

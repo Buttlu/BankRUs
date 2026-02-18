@@ -10,13 +10,11 @@ namespace BankRUs.Infrastructure.Services;
 
 public class CustomerService(
     ICustomerRepository customerRepository,
-    IBankAccountRepository bankAccountRepository,
     IUnitOfWork unitOfWork,
     ILogger<CustomerService> logger
 ) : ICustomerService
 {
     private readonly ICustomerRepository _customerRepository = customerRepository;
-    private readonly IBankAccountRepository _bankAccountRepository = bankAccountRepository;
     private readonly IUnitOfWork _unitOfWork = unitOfWork;
     private readonly ILogger<CustomerService> _logger = logger;
 
@@ -46,18 +44,9 @@ public class CustomerService(
             _logger.LogWarning("User with Id: {UserId} not found", id);
             return null;
         }
+        _logger.LogInformation("Found user: {UserId}", user.CustomerId);
 
-        var bankAccounts = await _bankAccountRepository.GetByUserId(id);
-        _logger.LogInformation("Found {BankAccountCount} bank accounts belonging to {UserId}", bankAccounts.Count, id);
-
-        return new CustomerDto(
-            CustomerId: user.CustomerId,
-                FirstName: user.FirstName,
-                LastName: user.LastName,
-                Email: user.Email!,
-                SocialSecurityNumber: user.SocialSecurityNumber,
-                BankAccounts: bankAccounts
-        );
+        return user;
     }
 
     public async Task UpdateCustomerInfo(Guid userId, UpdateUserDto updateDto)

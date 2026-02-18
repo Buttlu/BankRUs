@@ -6,21 +6,17 @@ namespace BankRUs.Application.UseCases.GetTransactions;
 
 public class GetTransactionsHandler(
     ITransactionService transactionService, 
-    IBankAccountRepository bankAccountRepository,
-    ILogger<GetTransactionsHandler> logger
+    IBankAccountService bankAccountService
 )
 {
     private readonly ITransactionService _transactionService = transactionService;
-    private readonly IBankAccountRepository _bankAccountRepository = bankAccountRepository;
-    private readonly ILogger<GetTransactionsHandler> _logger = logger;
+    private readonly IBankAccountService _bankAccountService = bankAccountService;
 
     public async Task<GetTransactionsResult> HandleAsync(GetTransactionsQuery query)
     {
-        var bankAccount = await _bankAccountRepository.GetById(query.BankAccountId);
-        if (bankAccount is null) {
-            _logger.LogWarning("Bank Account with Id: {BankAccountId} not found", query.BankAccountId);
-            throw new ArgumentException("Bank Account not found");
-        }
+        var bankAccount = await _bankAccountService.GetById(query.BankAccountId)
+            ?? throw new ArgumentException("Bank Account not found");
+
         var pageResult = await _transactionService.GetTransactionsAsPageResultAsync(query);
 
         return new GetTransactionsResult(
