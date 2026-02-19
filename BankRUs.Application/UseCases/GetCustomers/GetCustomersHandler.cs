@@ -14,14 +14,14 @@ public class GetCustomersHandler(
     private readonly IBankAccountService _bankAccountService = bankAccountService;
     private readonly ILogger<GetCustomersHandler> _logger = logger;
 
-    public async Task<GetCustomersResult> GetAllAsync(GetCustomersQuery query)
+    public async Task<GetCustomersResult> GetAllAsync(GetCustomersQuery query, CancellationToken cancellationToken)
     {
         var pagedCustomers = await _customerService.GetAllAsync(new GetCustomersFiltersDto(
             Page: query.Page,
             PageSize: query.PageSize,
             Ssn: query.Ssn,
             Email: query.Email
-        ));
+        ), cancellationToken);
 
         return new GetCustomersResult(
             Customers: pagedCustomers.Data,
@@ -29,12 +29,12 @@ public class GetCustomersHandler(
         );
     }
 
-    public async Task<GetCustomerByIdResult> GetByIdAsync(GetCustomerByIdQuery query)
+    public async Task<GetCustomerByIdResult> GetByIdAsync(GetCustomerByIdQuery query, CancellationToken cancellationToken)
     {
         var customer = await _customerService.GetByIdAsync(query.UserId)
             ?? throw new ArgumentException("Customer not found");
 
-        var bankAccounts = await _bankAccountService.GetByUserId(customer.CustomerId);
+        var bankAccounts = await _bankAccountService.GetByUserId(customer.CustomerId, cancellationToken);
         _logger.LogInformation("Found {BankAccountCount} bank accounts belonging to {UserId}", bankAccounts.Count, customer.CustomerId);
 
         return new GetCustomerByIdResult(

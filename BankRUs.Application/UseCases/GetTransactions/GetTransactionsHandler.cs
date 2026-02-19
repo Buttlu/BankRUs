@@ -1,6 +1,4 @@
-﻿using BankRUs.Application.Repositories;
-using BankRUs.Application.Services;
-using Microsoft.Extensions.Logging;
+﻿using BankRUs.Application.Services;
 
 namespace BankRUs.Application.UseCases.GetTransactions;
 
@@ -12,12 +10,12 @@ public class GetTransactionsHandler(
     private readonly ITransactionService _transactionService = transactionService;
     private readonly IBankAccountService _bankAccountService = bankAccountService;
 
-    public async Task<GetTransactionsResult> HandleAsync(GetTransactionsQuery query)
+    public async Task<GetTransactionsResult> HandleAsync(GetTransactionsQuery query, CancellationToken cancellationToken)
     {
-        var bankAccount = await _bankAccountService.GetById(query.BankAccountId)
+        var bankAccount = await _bankAccountService.GetById(query.BankAccountId, cancellationToken)
             ?? throw new ArgumentException("Bank Account not found");
 
-        var pageResult = await _transactionService.GetTransactionsAsPageResultAsync(query);
+        var pageResult = await _transactionService.GetTransactionsAsPageResultAsync(query, cancellationToken);
 
         return new GetTransactionsResult(
             AccountId: query.BankAccountId,

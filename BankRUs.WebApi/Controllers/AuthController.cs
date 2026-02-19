@@ -18,8 +18,10 @@ public class AuthController(AuthenticateUserHandler authenticateUserHandler) : C
     public async Task<IActionResult> Login([FromBody] LoginRequestDto request)
     {
         var result = await _authenticateUserHandler.HandleAsync(new AuthenticateUserCommand(
-            request.Username,
-            request.Password));
+                request.Username,
+                request.Password
+            )
+        );
 
         // 401 - unauthorized
         if (!result.Succeed) 

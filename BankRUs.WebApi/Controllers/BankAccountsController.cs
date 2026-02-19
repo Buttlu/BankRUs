@@ -31,14 +31,14 @@ public class BankAccountsController(
     [ProducesResponseType(typeof(BankAccountDto), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [HttpPost("create")]
-    public async Task<IActionResult> CreateBankAccount([FromBody] CreateBankAccountRequestDto request)
+    public async Task<IActionResult> CreateBankAccount([FromBody] CreateBankAccountRequestDto request, CancellationToken cancellationToken)
     {        
         OpenBankAccountResult openBankAccountResult;
         try {
             openBankAccountResult = await _bankAccountHandler.HandleAsync(new OpenBankAccountCommand(
                     UserId: request.UserId,
                     AccountName: request.AccountName
-                )
+                ), cancellationToken
             );
         } catch (ArgumentException ex) {
             ModelState.AddModelError("Account", ex.Message);
@@ -61,7 +61,11 @@ public class BankAccountsController(
     [ProducesResponseType(typeof(AddBalanceResultDto), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [HttpPost("{accoundId}/deposits")]
-    public async Task<IActionResult> AddBalance([FromRoute] Guid accoundId, [FromBody] AddBalanceDto addBalanceDto)
+    public async Task<IActionResult> AddBalance(
+        [FromRoute] Guid accoundId, 
+        [FromBody] AddBalanceDto addBalanceDto, 
+        CancellationToken cancellationToken
+    )
     {
         if (addBalanceDto.Amount <= 0) {
             ModelState.AddModelError("Amount", "Amount must be above 0");
@@ -78,7 +82,7 @@ public class BankAccountsController(
                 BankAccountId: accoundId,
                 Amount: addBalanceDto.Amount,
                 Reference: addBalanceDto.Reference
-            ));
+            ), cancellationToken);
         } catch (ArgumentException ex) { // Account not found
             ModelState.AddModelError("Account", ex.Message);
             return ValidationProblem(ModelState);
@@ -103,7 +107,11 @@ public class BankAccountsController(
     [ProducesResponseType(typeof(WithdrawBalanceResultDto), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [HttpPost("{accoundId}/withdrawals")]
-    public async Task<IActionResult> WithdrawBalance([FromRoute] Guid accoundId, [FromBody] WithdrawBalanceDto balanceDto)
+    public async Task<IActionResult> WithdrawBalance(
+        [FromRoute] Guid accoundId, 
+        [FromBody] WithdrawBalanceDto balanceDto, 
+        CancellationToken cancellationToken
+    )
     {
         if (balanceDto.Amount <= 0) {
             return ValidationProblem(ModelState);
@@ -119,7 +127,7 @@ public class BankAccountsController(
                 BankAccountId: accoundId,
                 Amount: balanceDto.Amount,
                 Reference: balanceDto.Reference
-            ));
+            ), cancellationToken);
         } catch (ArgumentException ex) {
             ModelState.AddModelError("Account", ex.Message);
             return ValidationProblem(ModelState);
@@ -146,7 +154,11 @@ public class BankAccountsController(
     [ProducesResponseType(typeof(ListTransactionResultDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [HttpGet("{accountId}/transactions")]
-    public async Task<IActionResult> GetTransactionsFromAccount([FromRoute] Guid accountId, [FromQuery] TransactionQuery query)
+    public async Task<IActionResult> GetTransactionsFromAccount(
+        [FromRoute] Guid accountId, 
+        [FromQuery] TransactionQuery query, 
+        CancellationToken cancellationToken
+    )
     {
         if (!ModelState.IsValid)
             return ValidationProblem(ModelState);
@@ -168,7 +180,7 @@ public class BankAccountsController(
                 To: query.To,
                 Type: query.Type,
                 Desc: query.Sort
-            ));
+            ), cancellationToken);
         } catch (ArgumentException ex) {
             ModelState.AddModelError("Account", ex.Message);
             return ValidationProblem(ModelState);

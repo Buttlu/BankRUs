@@ -12,9 +12,9 @@ public class UnitOfWork(
     private readonly ApplicationDbContext _context = context;
     private readonly ILogger<UnitOfWork> _logger = logger;
 
-    public async Task SaveAsync()
+    public async Task SaveAsync(CancellationToken cancellationToken)
     {
-        await _context.SaveChangesAsync();
+        await _context.SaveChangesAsync(cancellationToken);
         _logger.LogDebug("Saved changes to database");
     }
 }

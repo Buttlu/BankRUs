@@ -6,6 +6,6 @@ namespace BankRUs.Application.Services;
 
 public interface ITransactionService
 {
-    Task<PagedResponse<Transaction>> GetTransactionsAsPageResultAsync(GetTransactionsQuery query);
-    Task CreateTransaction(Transaction transaction);
+    Task<PagedResponse<Transaction>> GetTransactionsAsPageResultAsync(GetTransactionsQuery query, CancellationToken cancellationToken);
+    Task CreateTransaction(Transaction transaction, CancellationToken cancellationToken);
 }
