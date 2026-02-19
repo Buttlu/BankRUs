@@ -14,16 +14,16 @@ public class BankAccountRepository(
     public void Add(BankAccount bankAccount)
         => _context.BankAccounts.Add(bankAccount);
 
-    public async Task<BankAccount?> GetById(Guid bankAccountId)
+    public async Task<BankAccount?> GetById(Guid bankAccountId, CancellationToken cancellationToken)
         => await _context.BankAccounts
         .AsNoTracking()
-        .FirstOrDefaultAsync(b=> b.Id == bankAccountId);
+        .FirstOrDefaultAsync(b=> b.Id == bankAccountId, cancellationToken);
 
-    public async Task<IReadOnlyList<BankAccount>> GetByUserId(Guid userId)
+    public async Task<IReadOnlyList<BankAccount>> GetByUserId(Guid userId, CancellationToken cancellationToken)
         => await _context.BankAccounts
         .AsNoTracking()
         .Where(b => b.UserId == userId.ToString())
-        .ToListAsync();
+        .ToListAsync(cancellationToken);
 
     public void UpdateBalance(BankAccount bankAccount)
         => _context.BankAccounts.Update(bankAccount);

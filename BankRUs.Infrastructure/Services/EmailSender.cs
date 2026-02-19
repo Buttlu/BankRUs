@@ -4,7 +4,7 @@ namespace BankRUs.Infrastructure.Services;
 
 public class EmailSender : IEmailSender
 {
-    public async Task SendEmailAsync(string to, string from, string subject, string body)
+    public async Task SendEmailAsync(string to, string from, string subject, string body, CancellationToken cancellationToken)
     {
         // TODO  Skicka riktiga email
     }

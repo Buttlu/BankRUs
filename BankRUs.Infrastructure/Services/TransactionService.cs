@@ -17,10 +17,10 @@ public class TransactionService(
     private readonly IUnitOfWork _unitOfWork = unitOfWork;
     private readonly ILogger<TransactionService> _logger = logger;
 
-    public async Task CreateTransaction(Transaction transaction)
+    public async Task CreateTransaction(Transaction transaction, CancellationToken cancellationToken)
     {
         await _transactionRepository.CreateTransaction(transaction);
-        await _unitOfWork.SaveAsync();
+        await _unitOfWork.SaveAsync(cancellationToken);
 
         if (transaction.Type == "Deposit") {
             _logger.LogInformation("Deposit-Transaction with Id {TransactionId} created", transaction.Id);
@@ -31,9 +31,9 @@ public class TransactionService(
         }
     }
 
-    public async Task<PagedResponse<Transaction>> GetTransactionsAsPageResultAsync(GetTransactionsQuery query)
+    public async Task<PagedResponse<Transaction>> GetTransactionsAsPageResultAsync(GetTransactionsQuery query, CancellationToken cancellationToken)
     {
-        var (transactions, totalCount) = await _transactionRepository.GetAll(query);
+        var (transactions, totalCount) = await _transactionRepository.GetAll(query, cancellationToken);
         _logger.LogInformation("Found {TotalTransactions} transactions", totalCount);
 
         int totalPages = (int)Math.Ceiling((double)totalCount / query.PageSize);

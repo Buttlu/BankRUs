@@ -17,9 +17,9 @@ public class CustomerService(
     private readonly IUnitOfWork _unitOfWork = unitOfWork;
     private readonly ILogger<CustomerService> _logger = logger;
 
-    public async Task<PagedResponse<CustomerDto>> GetAllAsync(GetCustomersFiltersDto filters)
+    public async Task<PagedResponse<CustomerDto>> GetAllAsync(GetCustomersFiltersDto filters, CancellationToken cancellationToken)
     {
-        var (customers, customerCount) = await _customerRepository.GetAllAsync(filters);
+        var (customers, customerCount) = await _customerRepository.GetAllAsync(filters, cancellationToken);
         _logger.LogInformation("Found {CustomerCount} customers", customerCount);
 
         int totalPages = (int)Math.Ceiling((double)customerCount / filters.PageSize);
@@ -37,7 +37,7 @@ public class CustomerService(
 
     public async Task<CustomerDto?> GetByIdAsync(Guid id)
     {
-        var user = await _customerRepository.GetByIdAsync(id.ToString());
+        var user = await _customerRepository.GetByIdAsync(id);
         
         if (user is null) {
             _logger.LogWarning("User with Id: {UserId} not found", id);
@@ -54,11 +54,11 @@ public class CustomerService(
         _logger.LogInformation("Updated information of user: {UserId}", userId);
     }
 
-    public async Task<bool> DeleteCustomer(Guid customerId)
+    public async Task<bool> DeleteCustomer(Guid customerId, CancellationToken cancellationToken)
     {
         var succeeded = await _customerRepository.DeleteAsync(customerId);
         if (succeeded) {
-            await _unitOfWork.SaveAsync();
+            await _unitOfWork.SaveAsync(cancellationToken);
             _logger.LogInformation("Deleted user: {UserId}", customerId);
         } else {
             _logger.LogWarning("Failed to delete user: {UserId}", customerId);

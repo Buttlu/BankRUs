@@ -16,13 +16,13 @@ public class TransactionRepository(
         _context.Transactions.Add(transaction);
     }
 
-    public async Task<IReadOnlyList<Transaction>> GetFromBankAccountId(Guid bankAccountId)
+    public async Task<IReadOnlyList<Transaction>> GetFromBankAccountId(Guid bankAccountId, CancellationToken cancellationToken)
         => await _context.Transactions
             .AsNoTracking()
             .Where(t => t.AccountId == bankAccountId)
-            .ToListAsync();
+            .ToListAsync(cancellationToken);
 
-    public async Task<(IReadOnlyList<Transaction> transactions, int count)> GetAll(GetTransactionsQuery query)
+    public async Task<(IReadOnlyList<Transaction> transactions, int count)> GetAll(GetTransactionsQuery query, CancellationToken cancellationToken)
     {
         var transactions = _context.Transactions.AsNoTracking();
 
@@ -43,9 +43,9 @@ public class TransactionRepository(
         var items = await transactions
             .Skip((query.Page - 1) * query.PageSize)
             .Take(query.PageSize)
-            .ToListAsync();
+            .ToListAsync(cancellationToken);
 
-        var count = transactions.Count();
+        var count = await transactions.CountAsync(cancellationToken);
 
         return (items, count);
     }

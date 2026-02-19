@@ -13,7 +13,7 @@ public class CustomerRepository(
 {
     private readonly UserManager<ApplicationUser> _userManager = userManager;
 
-    public async Task<(IReadOnlyList<CustomerDto>, int)> GetAllAsync(GetCustomersFiltersDto filters)
+    public async Task<(IReadOnlyList<CustomerDto>, int)> GetAllAsync(GetCustomersFiltersDto filters, CancellationToken cancellationToken)
     {
         var customerQuery = _userManager.Users
             .Where(u => !u.IsDeleted);
@@ -34,14 +34,16 @@ public class CustomerRepository(
                 SocialSecurityNumber: a.SocialSecurityNumber,
                 BankAccounts: null
             ))
-            .ToListAsync();
+            .ToListAsync(cancellationToken);
 
-        return (customers, customerQuery.Count());
+        var customerCount = await customerQuery.CountAsync(cancellationToken);
+
+        return (customers, customerCount);
     }
 
-    public async Task<CustomerDto?> GetByIdAsync(string id)
+    public async Task<CustomerDto?> GetByIdAsync(Guid id)
     {
-        var user = await _userManager.FindByIdAsync(id);
+        var user = await _userManager.FindByIdAsync(id.ToString());
 
         if (user is null || user.IsDeleted) 
             return null;
