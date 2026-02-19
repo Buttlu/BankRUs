@@ -38,7 +38,7 @@ public class CustomersController(
     [ProducesResponseType(typeof(GetAllCustomersResponseDto), StatusCodes.Status200OK)]
     [HttpGet]
     [Authorize(Roles = Roles.CustomerService)]
-    public async Task<IActionResult> GetAll([FromQuery] CustomerRequestDto requestDto)
+    public async Task<IActionResult> GetAll([FromQuery] CustomerRequestDto requestDto, CancellationToken cancellationToken)
     {
         int page = requestDto.Page ?? 1;
         int pageSize = requestDto.PageSize ?? _pageOptions.DefaultPageSize;
@@ -51,7 +51,7 @@ public class CustomersController(
             PageSize: pageSize,
             Ssn: requestDto.Ssn,
             Email: requestDto.Email
-        ));
+        ), cancellationToken);
 
         var response = new GetAllCustomersResponseDto(
             Data: result.Customers,
@@ -70,13 +70,13 @@ public class CustomersController(
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [HttpGet("{id}")]
     [Authorize(Roles = Roles.CustomerService)]
-    public async Task<IActionResult> GetById([FromRoute] Guid id)
+    public async Task<IActionResult> GetById([FromRoute] Guid id, CancellationToken cancellationToken)
     {
         GetCustomerByIdResult result;
         try {
             result = await _getCustomersHandler.GetByIdAsync(new GetCustomerByIdQuery(
                 UserId: id
-            ));
+            ), cancellationToken);
         } catch (ArgumentException) {
             return NotFound();
         }
@@ -107,7 +107,8 @@ public class CustomersController(
     [Authorize(Roles = $"{Roles.Customer},{Roles.CustomerService}")]
     public async Task<IActionResult> Patch(
         [FromRoute] Guid id,
-        [FromBody] JsonPatchDocument<UpdateUserDto> patchDoc
+        [FromBody] JsonPatchDocument<UpdateUserDto> patchDoc,
+        CancellationToken cancellationToken
     )
     {
         if (patchDoc is null) return BadRequest();
@@ -146,9 +147,9 @@ public class CustomersController(
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [HttpPost("{id}/delete")]
-    public async Task<IActionResult> DeleteCustomerById([FromRoute] Guid id)
+    public async Task<IActionResult> DeleteCustomerById([FromRoute] Guid id, CancellationToken cancellationToken)
     {
-        var result = await _deleteCustomerHandler.HandleAsync(new DeleteCustomerCommand(id));
+        var result = await _deleteCustomerHandler.HandleAsync(new DeleteCustomerCommand(id), cancellationToken);
 
         if (!result.Succeeded)
             return NotFound();

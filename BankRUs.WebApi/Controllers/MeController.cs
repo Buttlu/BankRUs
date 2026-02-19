@@ -24,15 +24,15 @@ public class MeController(
     [ProducesResponseType(typeof(MeResponseDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [HttpGet]
-    public async Task<IActionResult> Get()
+    public async Task<IActionResult> Get(CancellationToken cancellationToken)
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);        
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (string.IsNullOrWhiteSpace(userId))
             return Unauthorized();
 
         GetMyDetailsResult result;
         try {
-            result = await _getMyDetailsHandler.HandleAsync(new GetMyDetailsQuery(Guid.Parse(userId)));
+            result = await _getMyDetailsHandler.HandleAsync(new GetMyDetailsQuery(Guid.Parse(userId)), cancellationToken);
         } catch (ArgumentException ex) {
             ModelState.AddModelError("Account", ex.Message);
             return ValidationProblem(ModelState);
@@ -60,12 +60,12 @@ public class MeController(
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]    
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [HttpPost("delete")]
-    public async Task<IActionResult> Delete()
+    public async Task<IActionResult> Delete(CancellationToken cancellationToken)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (userId is null) return Unauthorized();
 
-        var result = await _deleteCustomerHandler.HandleAsync(new DeleteCustomerCommand(Guid.Parse(userId)));
+        var result = await _deleteCustomerHandler.HandleAsync(new DeleteCustomerCommand(Guid.Parse(userId)), cancellationToken);
         
         if (!result.Succeeded) return NotFound();
 

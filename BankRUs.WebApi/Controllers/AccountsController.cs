@@ -1,7 +1,5 @@
 ﻿using BankRUs.Application.UseCases.OpenAccount;
-using BankRUs.Application.UseCases.UpdateAccount;
 using BankRUs.WebApi.Dtos.Accounts;
-using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BankRUs.WebApi.Controllers;
@@ -19,7 +17,7 @@ public class AccountsController(
     [ProducesResponseType(typeof(CreateAccountResponseDto), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [HttpPost("create")]
-    public async Task<IActionResult> Create([FromBody] CreateAccountRequestDto requestDto)
+    public async Task<IActionResult> Create([FromBody] CreateAccountRequestDto requestDto, CancellationToken cancellationToken)
     {
         OpenAccountCommand command = new(
             FirstName: requestDto.FirstName,
@@ -34,7 +32,7 @@ public class AccountsController(
 
         OpenAccountResult result;
         try {
-            result = await _openAccountHandler.HandleAsync(command);
+            result = await _openAccountHandler.HandleAsync(command, cancellationToken);
         } catch (Exception ex) {
             ModelState.AddModelError("Duplicate Entry", ex.Message);
             return ValidationProblem(ModelState);
