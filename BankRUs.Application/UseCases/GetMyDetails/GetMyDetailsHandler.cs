@@ -10,12 +10,12 @@ public class GetMyDetailsHandler(
     private readonly ICustomerService _customerService = customerService;
     private readonly IBankAccountService _bankAccountService = bankAccountService;
 
-    public async Task<GetMyDetailsResult> HandleAsync(GetMyDetailsQuery query)
+    public async Task<GetMyDetailsResult> HandleAsync(GetMyDetailsQuery query, CancellationToken cancellationToken)
     {
         var customer = await _customerService.GetByIdAsync(query.UserId)
             ?? throw new ArgumentException("Customer not found");
 
-        var bankAccounts = await _bankAccountService.GetByUserId(query.UserId);
+        var bankAccounts = await _bankAccountService.GetByUserId(query.UserId, cancellationToken);
 
         return new GetMyDetailsResult(
             Id: customer.CustomerId,

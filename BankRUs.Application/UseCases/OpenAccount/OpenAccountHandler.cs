@@ -16,7 +16,7 @@ public class OpenAccountHandler(
     private readonly IEmailSender _emailSender = emailSender;
     private readonly IAccountNumberGenerator _accountNumberGenerator = accountNumberGenerator;
 
-    public async Task<OpenAccountResult> HandleAsync(OpenAccountCommand command)
+    public async Task<OpenAccountResult> HandleAsync(OpenAccountCommand command, CancellationToken cancellationToken)
     {
         // TODO: skapa konto (identity)
         //      Delegera till infrastructure
@@ -33,7 +33,7 @@ public class OpenAccountHandler(
             accountNumber: _accountNumberGenerator.Generate(),
             name: "standardkonto",
             userId: result.UserId.ToString());
-        await _bankAccountService.UpdateBalance(bankAccount);
+        await _bankAccountService.UpdateBalance(bankAccount, cancellationToken);
 
         // TODO: skick välkomstmail
         //      Delegera till infrastructure
@@ -41,8 +41,8 @@ public class OpenAccountHandler(
             from: "no-reply@bankrus.com",
             to: command.Email,
             subject: "Account created",
-            body: "Your account has been created"
-            );
+            body: "Your account has been created",
+            cancellationToken: cancellationToken);
 
         return new OpenAccountResult(UserId: result.UserId);
     }

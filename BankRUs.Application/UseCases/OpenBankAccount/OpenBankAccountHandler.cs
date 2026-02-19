@@ -16,7 +16,7 @@ public class OpenBankAccountHandler(
     private readonly IBankAccountService _bankAccountService = bankAccountService;
     private readonly ILogger<OpenBankAccountHandler> _logger = logger;
 
-    public async Task<OpenBankAccountResult> HandleAsync(OpenBankAccountCommand command)
+    public async Task<OpenBankAccountResult> HandleAsync(OpenBankAccountCommand command, CancellationToken cancellationToken)
     {
         var customer = await _customerService.GetByIdAsync(command.UserId)
             ?? throw new ArgumentException("Cannot find customer");
@@ -27,7 +27,7 @@ public class OpenBankAccountHandler(
             userId: customer.CustomerId.ToString()
         );
 
-        await _bankAccountService.Add(bankAccount);
+        await _bankAccountService.Add(bankAccount, cancellationToken);
         _logger.LogInformation("Created User {UserId} with bank account {BankAccountId}", customer.CustomerId, bankAccount.Id);
 
         return new OpenBankAccountResult(

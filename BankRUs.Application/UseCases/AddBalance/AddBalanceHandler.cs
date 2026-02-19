@@ -11,13 +11,13 @@ public class AddBalanceHandler(
     private readonly ITransactionService _transactionService = transactionService;
     private readonly IBankAccountService _bankAccountService = bankAccountService;
 
-    public async Task<AddBalanceResult> HandleAsync(AddBalanceCommand command)
+    public async Task<AddBalanceResult> HandleAsync(AddBalanceCommand command, CancellationToken cancellationToken)
     {
-        var bankAccount = await _bankAccountService.GetById(command.BankAccountId)
+        var bankAccount = await _bankAccountService.GetById(command.BankAccountId, cancellationToken)
             ?? throw new ArgumentException("Bank Account not found");
 
         bankAccount.Deposit(amount: command.Amount);
-        await _bankAccountService.UpdateBalance(bankAccount);
+        await _bankAccountService.UpdateBalance(bankAccount, cancellationToken);
 
         var transaction = new Transaction {
             Id = Guid.NewGuid(),
@@ -31,7 +31,7 @@ public class AddBalanceHandler(
             BalanceAfter = bankAccount.Balance
         };
 
-        await _transactionService.CreateTransaction(transaction);
+        await _transactionService.CreateTransaction(transaction, cancellationToken);
         
         return new AddBalanceResult (
             TransactionId: transaction.Id,
