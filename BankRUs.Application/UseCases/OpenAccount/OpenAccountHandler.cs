@@ -33,7 +33,7 @@ public class OpenAccountHandler(
             accountNumber: _accountNumberGenerator.Generate(),
             name: "standardkonto",
             userId: result.UserId.ToString());
-        await _bankAccountService.UpdateBalance(bankAccount, cancellationToken);
+        await _bankAccountService.Add(bankAccount, cancellationToken);
 
         // TODO: skick välkomstmail
         //      Delegera till infrastructure
