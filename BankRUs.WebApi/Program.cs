@@ -145,10 +145,10 @@ var loggerConfiguration = new LoggerConfiguration();
 
 if (app.Environment.IsDevelopment()) {
     using var scope = app.Services.CreateScope();
-    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    dbContext.Database.Migrate(); 
-
+    //var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    //dbContext.Database.Migrate();
     await new IdentitySeeder().SeedAsync(scope.ServiceProvider);
+
 
     app.MapOpenApi();
     app.MapScalarApiReference();
